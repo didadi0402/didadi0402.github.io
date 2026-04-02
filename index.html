@@ -50,7 +50,7 @@
     }
     .icon-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       gap: 8px;
     }
     .icon-item {
@@ -270,17 +270,10 @@
   <!-- 이메일 팝업 -->
   <div id="emailPopup" class="popup-overlay">
     <div class="popup-box">
-      <div class="popup-email">didadi0402@ai.cne.go.kr</div>
+      <div class="popup-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="74101d1015101d4440444634151d5a171a115a131b5a1f06">[email&#160;protected]</a></div>
       <div class="popup-desc">위 이메일 주소로 목천초 월간 계획서를 발송해주세요</div>
       <button class="popup-close" onclick="document.getElementById('emailPopup').style.display='none'">닫기</button>
     </div>
   </div>
 
-  <script>
-  document.getElementById('emailPopup').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-  });
-  </script>
-
-</body>
-</html>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5
