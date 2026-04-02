@@ -127,6 +127,41 @@
       height: 100%;
       object-fit: contain;
     }
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .popup-box {
+      background: white;
+      padding: 36px 40px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .popup-email {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2d5a8e;
+      margin-bottom: 8px;
+    }
+    .popup-desc {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    .popup-close {
+      padding: 10px 30px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +208,10 @@
         <div class="icon-img"><img src="images/information-icon.svg" alt="" /></div>
         <div class="icon-label">주요정보</div>
       </a>
+      <a href="#" class="icon-item" onclick="event.preventDefault(); document.getElementById('emailPopup').style.display='flex';">
+        <div class="icon-img"><img src="images/envelope-line-icon.svg" alt="" /></div>
+        <div class="icon-label">이메일</div>
+      </a>
     </div>
   </div>
 
@@ -204,6 +243,10 @@
         <div class="icon-img"><img src="images/information-icon.svg" alt="" /></div>
         <div class="icon-label">주요정보</div>
       </a>
+      <a href="#" class="icon-item" onclick="event.preventDefault(); document.getElementById('emailPopup').style.display='flex';">
+        <div class="icon-img"><img src="images/envelope-line-icon.svg" alt="" /></div>
+        <div class="icon-label">이메일</div>
+      </a>
     </div>
   </div>
 
@@ -215,7 +258,7 @@
       <a href="https://send.cne.go.kr/b2cCNE/cne/login.do" class="link-item" target="_blank"><div class="link-label">문자알리미</div></a>
       <a href="https://v4.schoolbell-e.com/" class="link-item" target="_blank"><div class="link-label">학교종이</div></a>
       <a href="https://next.share.go.kr/idx-login.do" class="link-item" target="_blank"><div class="link-label">행정정보공동이용시스템</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크5</div></a>
+      <a href="https://ai.cne.go.kr/" class="link-item" target="_blank"><div class="link-label">마주온</div></a>
       <a href="#" class="link-item"><div class="link-label">링크6</div></a>
       <a href="#" class="link-item"><div class="link-label">링크7</div></a>
       <a href="#" class="link-item"><div class="link-label">링크8</div></a>
@@ -223,6 +266,21 @@
       <a href="#" class="link-item"><div class="link-label">링크10</div></a>
     </div>
   </div>
+
+  <!-- 이메일 팝업 -->
+  <div id="emailPopup" class="popup-overlay">
+    <div class="popup-box">
+      <div class="popup-email">didadi0402@ai.cne.go.kr</div>
+      <div class="popup-desc">위 이메일 주소로 목천초 월간 계획서를 발송해주세요</div>
+      <button class="popup-close" onclick="document.getElementById('emailPopup').style.display='none'">닫기</button>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById('emailPopup').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+  </script>
 
 </body>
 </html>
