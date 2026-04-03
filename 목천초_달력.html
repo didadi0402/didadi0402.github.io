@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>늘봄지원실 업무 달력</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: #fff8f3; min-height: 100vh; color: #333; }
+
+header {
+  background: linear-gradient(135deg, #e8772a, #f4a55a);
+  padding: 20px 20px 16px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
+header h1 { font-family: 'Jua', sans-serif; font-size: 24px; color: white; letter-spacing: 2px; margin-bottom: 4px; }
+header p { font-size: 12px; color: rgba(255,255,255,0.85); }
+
+.view-controls {
+  display: flex; justify-content: center; align-items: center;
+  gap: 12px; padding: 14px 16px 10px;
+}
+.view-btn {
+  padding: 7px 20px; border-radius: 20px; border: 2px solid #f4a55a;
+  background: white; font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px; font-weight: 700; color: #e8772a; cursor: pointer;
+  transition: all 0.2s;
+}
+.view-btn.active { background: #e8772a; color: white; border-color: #e8772a; }
+.year-nav { display: flex; align-items: center; gap: 10px; }
+.year-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #f4a55a;
+  background: white; color: #e8772a; font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.year-btn:hover { background: #e8772a; color: white; }
+.year-label { font-family: 'Jua', sans-serif; font-size: 16px; color: #e8772a; min-width: 100px; text-align: center; }
+
+.legend {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 12px; padding: 0 16px 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+.monthly-view { max-width: 860px; margin: 0 auto; padding: 0 12px 30px; }
+.month-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0 14px;
+}
+.month-nav-btn {
+  padding: 6px 16px; border-radius: 20px; border: 2px solid #f4a55a;
+  background: white; color: #e8772a; font-family: 'Jua', sans-serif;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.month-nav-btn:hover { background: #e8772a; color: white; }
+.month-title { font-family: 'Jua', sans-serif; font-size: 22px; color: #c45e1a; letter-spacing: 1px; }
+
+.calendar-grid { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(232,119,42,0.1); }
+.day-headers { display: grid; grid-template-columns: repeat(7,1fr); background: #e8772a; }
+.day-header {
+  padding: 10px 0; text-align: center;
+  font-size: 12px; font-weight: 700; color: white; letter-spacing: 1px;
+}
+.day-header.sun { color: #ffd5b8; }
+
+.calendar-days { display: grid; grid-template-columns: repeat(7,1fr); }
+.day-cell {
+  min-height: 90px; border-right: 1px solid #fdeee4;
+  border-bottom: 1px solid #fdeee4; padding: 6px 5px 4px;
+  cursor: pointer; transition: background 0.15s; position: relative;
+}
+.day-cell:hover { background: #fff8f3; }
+.day-cell.other-month { background: #fff8f3; opacity: 0.5; cursor: default; }
+.day-cell.today { box-shadow: inset 0 0 0 2px #e8772a; }
+.day-cell.vacation { background: #fef3e8; }
+.day-cell.vacation:hover { background: #fde8d0; }
+
+.day-number {
+  font-size: 13px; font-weight: 700; display: inline-block;
+  width: 24px; height: 24px; border-radius: 50%;
+  text-align: center; line-height: 24px; margin-bottom: 2px; color: #333;
+}
+.day-number.sunday { color: #e53935; }
+.day-number.holiday { color: #e53935; }
+.day-number.today-num { background: #e8772a; color: white !important; box-shadow: 0 2px 6px rgba(232,119,42,0.4); }
+
+.event-chip {
+  display: block; font-size: 10px; padding: 1px 5px;
+  border-radius: 4px; margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.more-events { font-size: 10px; color: #f4a55a; padding-left: 2px; cursor: pointer; }
+.holiday-name { font-size: 9px; color: #e53935; display: block; margin-bottom: 1px; font-weight: 600; }
+.vacation-label { font-size: 9px; color: #c45e1a; display: block; margin-bottom: 1px; font-weight: 600; }
+
+.yearly-view {
+  max-width: 1100px; margin: 0 auto; padding: 0 12px 30px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.mini-month { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 8px rgba(232,119,42,0.08); cursor: pointer; transition: all 0.2s; }
+.mini-month:hover { box-shadow: 0 4px 16px rgba(232,119,42,0.2); transform: translateY(-2px); }
+.mini-month-header { background: #e8772a; padding: 8px; text-align: center; font-family: 'Jua', sans-serif; font-size: 13px; color: white; letter-spacing: 1px; }
+.mini-day-headers { display: grid; grid-template-columns: repeat(7,1fr); background: #fde8d0; }
+.mini-day-header { padding: 3px 0; text-align: center; font-size: 8px; font-weight: 700; color: #e8772a; }
+.mini-day-header.sun { color: #e53935; }
+.mini-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 2px; }
+.mini-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; border-radius: 3px; margin: 1px; }
+.mini-day.other { opacity: 0.3; }
+.mini-day.vacation { background: #fde8d0; }
+.mini-day.holiday-day { color: #e53935; font-weight: 700; }
+.mini-day.today-mini { background: #e8772a; color: white; border-radius: 50%; font-weight: 700; }
+.mini-day.has-event { position: relative; }
+.mini-day.has-event::after {
+  content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px; background: #e8772a; border-radius: 50%;
+}
+
+.popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  display: none; align-items: center; justify-content: center; z-index: 200;
+}
+.popup-overlay.show { display: flex; }
+.popup { background: white; border-radius: 16px; width: 320px; max-width: 90vw; box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden; }
+.popup-header { background: linear-gradient(135deg, #e8772a, #f4a55a); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+.popup-title { font-family: 'Jua', sans-serif; font-size: 16px; color: white; letter-spacing: 1px; }
+.popup-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; line-height: 1; }
+.popup-body { padding: 16px; }
+.existing-events { margin-bottom: 12px; }
+.existing-event-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 8px; margin-bottom: 4px; font-size: 12px; }
+.event-delete-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; padding: 0 2px; transition: color 0.15s; }
+.event-delete-btn:hover { color: #e53935; }
+.popup-section-title { font-size: 12px; font-weight: 700; color: #e8772a; margin-bottom: 8px; }
+.popup input[type="text"] {
+  width: 100%; padding: 9px 12px; border: 2px solid #fde0c8;
+  border-radius: 8px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px;
+  outline: none; margin-bottom: 8px; transition: border-color 0.2s;
+}
+.popup input[type="text"]:focus { border-color: #e8772a; }
+.color-picker { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.color-opt { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.color-opt.selected { border-color: #333; transform: scale(1.15); }
+.popup-add-btn { width: 100%; padding: 10px; background: #e8772a; border: none; border-radius: 10px; color: white; font-family: 'Jua', sans-serif; font-size: 14px; cursor: pointer; transition: background 0.2s; letter-spacing: 1px; }
+.popup-add-btn:hover { background: #c45e1a; }
+
+#loadingBar {
+  display: none; position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; background: linear-gradient(90deg, #e8772a, #f4a55a, #e8772a);
+  background-size: 200% 100%; animation: loadingAnim 1.2s infinite; z-index: 999;
+}
+@keyframes loadingAnim { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 300; }
+.confirm-overlay.show { display: flex; }
+.confirm-box { background: white; border-radius: 14px; padding: 24px 20px; width: 280px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+.confirm-box p { font-size: 14px; color: #444; margin-bottom: 18px; line-height: 1.6; }
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-btn { flex: 1; padding: 9px; border-radius: 8px; border: none; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+.confirm-cancel { background: #fde8d0; color: #e8772a; }
+.confirm-delete { background: #e53935; color: white; }
+
+#syncStatus { text-align: center; font-size: 11px; padding: 4px 0 2px; color: #aaa; }
+#syncStatus.ok { color: #1a7a45; }
+#syncStatus.err { color: #e53935; }
+</style>
+</head>
+<body>
+
+<div id="loadingBar"></div>
+
+<header>
+  <h1>늘봄지원실 업무 달력</h1>
+  <p>목천초등학교 2026학년도 학사일정</p>
+</header>
+
+<div class="view-controls">
+  <button class="view-btn active" id="btnMonthly" onclick="switchView('monthly')">월별 보기</button>
+  <div class="year-nav">
+    <button class="year-btn" onclick="changeYear(-1)">‹</button>
+    <span class="year-label" id="yearLabel">2026학년도</span>
+    <button class="year-btn" onclick="changeYear(1)">›</button>
+  </div>
+  <button class="view-btn" id="btnYearly" onclick="switchView('yearly')">연간 보기</button>
+</div>
+
+<div id="syncStatus">데이터 불러오는 중...</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#ffc1c1"></div> 공휴일</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fde8d0"></div> 방학</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e8d5f5"></div> 학교 행사</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c8f0d8"></div> 늘봄 업무</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fde68a"></div> 기타</div>
+  <div class="legend-item" style="border: 2px solid #e8772a; border-radius:3px; padding:0 4px;">오늘</div>
+</div>
+
+<div id="monthlyView" class="monthly-view">
+  <div class="month-nav">
+    <button class="month-nav-btn" onclick="changeMonth(-1)">‹ 이전달</button>
+    <span class="month-title" id="monthTitle"></span>
+    <button class="month-nav-btn" onclick="changeMonth(1)">다음달 ›</button>
+  </div>
+  <div class="calendar-grid">
+    <div class="day-headers">
+      <div class="day-header sun">일</div>
+      <div class="day-header">월</div>
+      <div class="day-header">화</div>
+      <div class="day-header">수</div>
+      <div class="day-header">목</div>
+      <div class="day-header">금</div>
+      <div class="day-header">토</div>
+    </div>
+    <div class="calendar-days" id="calendarDays"></div>
+  </div>
+</div>
+
+<div id="yearlyView" class="yearly-view" style="display:none"></div>
+
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup">
+    <div class="popup-header">
+      <span class="popup-title" id="popupDate">날짜</span>
+      <button class="popup-close" onclick="closePopupBtn()">✕</button>
+    </div>
+    <div class="popup-body">
+      <div class="existing-events" id="existingEvents"></div>
+      <div class="popup-section-title">+ 일정 추가</div>
+      <input type="text" id="eventInput" placeholder="일정 제목 입력..." onkeydown="if(event.key==='Enter') addEvent()"/>
+      <div style="font-size:11px;color:#999;margin-bottom:6px;">색상 선택</div>
+      <div class="color-picker" id="colorPicker"></div>
+      <button class="popup-add-btn" onclick="addEvent()">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMsg">이 일정을 삭제하시겠어요?</p>
+    <div class="confirm-btns">
+      <button class="confirm-btn confirm-cancel" onclick="closeConfirm()">취소</button>
+      <button class="confirm-btn confirm-delete" onclick="doDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// ★ 여기에 새 Apps Script URL을 붙여넣으세요 ★
+// =============================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbx8wzs-yPkhqWWFbems1ZXuVzma_JEe9H11pMaDqo966nUSE7gYHh-mZ7XKe0j3li6sLA/exec';
+
+const COLORS = [
+  {name:'학교행사', bg:'#e8d5f5', text:'#6a3fa0'},
+  {name:'늘봄업무', bg:'#c8f0d8', text:'#1a7a45'},
+  {name:'기타',     bg:'#fde68a', text:'#92650a'},
+  {name:'중요',     bg:'#ffd5d5', text:'#c0392b'},
+  {name:'파랑',     bg:'#cce8fa', text:'#1a5fa0'},
+  {name:'회색',     bg:'#e8e8e8', text:'#555555'},
+];
+
+const HOLIDAYS = {
+  '2026-01-01':'신정','2026-01-29':'설연휴','2026-01-30':'설날','2026-01-31':'설연휴',
+  '2026-02-02':'대체공휴일','2026-03-01':'3.1절','2026-03-02':'대체공휴일',
+  '2026-05-05':'어린이날','2026-05-24':'부처님오신날','2026-05-25':'대체공휴일',
+  '2026-06-03':'지방선거','2026-06-06':'현충일','2026-07-17':'제헌절',
+  '2026-08-15':'광복절','2026-08-17':'대체공휴일',
+  '2026-09-24':'추석연휴','2026-09-25':'추석','2026-09-26':'추석연휴',
+  '2026-10-03':'개천절','2026-10-05':'대체공휴일','2026-10-09':'한글날',
+  '2026-12-25':'성탄절',
+  '2027-01-01':'신정','2027-01-28':'설연휴','2027-01-29':'설날','2027-01-30':'설연휴',
+  '2027-02-09':'대체공휴일',
+};
+
+function isVacation(ds) {
+  const d = new Date(ds);
+  // 여름방학: 2026-07-24 ~ 2026-08-18
+  if (d >= new Date('2026-07-24') && d <= new Date('2026-08-18')) return true;
+  // 겨울방학: 2027-01-01 ~ 2027-02-28
+  if (d >= new Date('2027-01-01') && d <= new Date('2027-02-28')) return true;
+  return false;
+}
+
+// 목천초 학사일정
+const SCHOOL_EVENTS = {
+  '2026-03-03': [{title:'시업식', color:COLORS[0]}],
+  '2026-03-05': [{title:'학급임원선거(3~6학년)', color:COLORS[0]}],
+  '2026-03-19': [{title:'교육과정설명회', color:COLORS[0]}],
+  '2026-03-20': [{title:'놀이한마당', color:COLORS[0]}],
+  '2026-03-24': [{title:'현장체험학습(1~3학년)', color:COLORS[0]}],
+  '2026-05-04': [{title:'학교장재량휴업일', color:COLORS[2]}],
+  '2026-05-07': [{title:'가족캠프', color:COLORS[0]}],
+  '2026-05-21': [{title:'현장체험학습(4~6학년)', color:COLORS[0]}],
+  '2026-07-01': [{title:'교육과정 평가회', color:COLORS[0]}],
+  '2026-07-02': [{title:'수련활동(5~6학년)', color:COLORS[0]}],
+  '2026-07-03': [{title:'수련활동(5~6학년)', color:COLORS[0]}],
+  '2026-07-06': [{title:'방과후학교 수업공개', color:COLORS[1]}],
+  '2026-07-09': [{title:'2학기 전교학생회 임원 선거', color:COLORS[0]}],
+  '2026-07-23': [{title:'여름방학식', color:COLORS[0]}],
+  '2026-08-19': [{title:'개학식', color:COLORS[0]}],
+  '2026-08-21': [{title:'학급임원선거(3~6학년)', color:COLORS[0]}],
+  '2026-10-30': [{title:'느티나무축제', color:COLORS[0]}],
+  '2026-11-23': [{title:'교육과정평가회', color:COLORS[0]}],
+  '2026-12-31': [{title:'종업식', color:COLORS[0]}],
+};
+
+let currentSchoolYear = 2026;
+let currentYear = 2026;
+let currentMonth = 2;
+let currentView = 'monthly';
+let selectedDateStr = '';
+let selectedColorIdx = 0;
+let deleteTarget = null;
+let eventsCache = {};
+
+const today = new Date();
+const todayStr = fmtDate(today.getFullYear(), today.getMonth(), today.getDate());
+
+function fmtDate(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function getSchoolYear(year, month) { return month >= 2 ? year : year - 1; }
+function updateYearLabel() { document.getElementById('yearLabel').textContent = `${currentSchoolYear}학년도`; }
+function setLoading(on) { document.getElementById('loadingBar').style.display = on ? 'block' : 'none'; }
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = msg; el.className = cls || '';
+}
+
+function jsonpRequest(params) {
+  return new Promise((resolve) => {
+    const cbName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    const query = Object.entries({...params, callback: cbName})
+      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+    let done = false;
+
+    window[cbName] = (data) => {
+      done = true;
+      delete window[cbName];
+      if (script.parentNode) document.body.removeChild(script);
+      resolve(data);
+    };
+
+    script.onerror = () => { if (!done) { delete window[cbName]; resolve({}); } };
+    script.src = `${API_URL}?${query}`;
+    document.body.appendChild(script);
+
+    setTimeout(() => {
+      if (!done) { done = true; delete window[cbName]; if (script.parentNode) document.body.removeChild(script); resolve({}); }
+    }, 6000);
+  });
+}
+
+async function initStorage() {
+  setLoading(true);
+  setSyncStatus('데이터 불러오는 중...');
+  try {
+    const data = await jsonpRequest({t: Date.now()});
+    if (data && data.ok) {
+      eventsCache = data.events || {};
+      setSyncStatus('✓ 동기화 완료', 'ok');
+    } else {
+      setSyncStatus('⚠ 데이터 없음 (오프라인 모드)', 'err');
+    }
+  } catch(e) {
+    setSyncStatus('⚠ 연결 실패 (오프라인 모드)', 'err');
+  }
+  setLoading(false);
+  render();
+}
+
+async function apiAdd(dateStr, title, color) {
+  try {
+    await jsonpRequest({action:'add', date:dateStr, title, bg:color.bg, text:color.text});
+  } catch(e) { console.error('추가 실패:', e); }
+}
+
+async function apiDelete(dateStr, title) {
+  try {
+    await jsonpRequest({action:'delete', date:dateStr, title});
+  } catch(e) { console.error('삭제 실패:', e); }
+}
+
+function getAllEvents(ds) {
+  return [...(SCHOOL_EVENTS[ds] || []), ...(eventsCache[ds] || [])];
+}
+
+function renderMonthly() {
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const sy = getSchoolYear(currentYear, currentMonth);
+  document.getElementById('monthTitle').textContent = `${sy}학년도 ${months[currentMonth]}`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    let day, month, year, isOther = false;
+    if (i < firstDay) {
+      day = daysInPrev - firstDay + i + 1;
+      month = currentMonth - 1; year = currentYear;
+      if (month < 0) { month = 11; year--; }
+      isOther = true;
+    } else if (i >= firstDay + daysInMonth) {
+      day = i - firstDay - daysInMonth + 1;
+      month = currentMonth + 1; year = currentYear;
+      if (month > 11) { month = 0; year++; }
+      isOther = true;
+    } else {
+      day = i - firstDay + 1; month = currentMonth; year = currentYear;
+    }
+
+    const ds = fmtDate(year, month, day);
+    const dow = i % 7;
+    const isToday = ds === todayStr;
+    const isHoliday = !!HOLIDAYS[ds];
+    const isVac = isVacation(ds);
+    const events = isOther ? [] : getAllEvents(ds);
+
+    let cellCls = 'day-cell';
+    if (isOther) cellCls += ' other-month';
+    if (isToday) cellCls += ' today';
+    if (isVac && !isOther) cellCls += ' vacation';
+
+    let numCls = 'day-number';
+    if (dow === 0) numCls += ' sunday';
+    if (isHoliday) numCls += ' holiday';
+    if (isToday) numCls += ' today-num';
+
+    let inner = '';
+    if (isVac && !isOther) inner += `<span class="vacation-label">방학</span>`;
+    if (isHoliday && !isOther) inner += `<span class="holiday-name">${HOLIDAYS[ds]}</span>`;
+
+    const shown = events.slice(0, 2);
+    const extra = events.length - 2;
+    shown.forEach(ev => {
+      const c = ev.color || COLORS[2];
+      inner += `<span class="event-chip" style="background:${c.bg};color:${c.text}">${ev.title}</span>`;
+    });
+    if (extra > 0) inner += `<span class="more-events">+${extra}개 더</span>`;
+
+    const clickAttr = isOther ? '' : `onclick="openPopup('${ds}')"`;
+    html += `<div class="${cellCls}" ${clickAttr}><span class="${numCls}">${day}</span>${inner}</div>`;
+  }
+  document.getElementById('calendarDays').innerHTML = html;
+}
+
+function renderYearly() {
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const schoolMonths = [
+    {year:currentSchoolYear,   month:2},
+    {year:currentSchoolYear,   month:3},
+    {year:currentSchoolYear,   month:4},
+    {year:currentSchoolYear,   month:5},
+    {year:currentSchoolYear,   month:6},
+    {year:currentSchoolYear,   month:7},
+    {year:currentSchoolYear,   month:8},
+    {year:currentSchoolYear,   month:9},
+    {year:currentSchoolYear,   month:10},
+    {year:currentSchoolYear,   month:11},
+    {year:currentSchoolYear+1, month:0},
+    {year:currentSchoolYear+1, month:1},
+  ];
+
+  let html = '';
+  schoolMonths.forEach(({year:yr, month:m}) => {
+    const firstDay = new Date(yr, m, 1).getDay();
+    const daysInMonth = new Date(yr, m + 1, 0).getDate();
+    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+    let miniDays = '';
+
+    for (let i = 0; i < totalCells; i++) {
+      if (i < firstDay || i >= firstDay + daysInMonth) {
+        miniDays += `<div class="mini-day other"></div>`;
+      } else {
+        const day = i - firstDay + 1;
+        const ds = fmtDate(yr, m, day);
+        const dow = i % 7;
+        let cls = 'mini-day';
+        if (isVacation(ds)) cls += ' vacation';
+        if (HOLIDAYS[ds] || dow === 0) cls += ' holiday-day';
+        if (ds === todayStr) cls += ' today-mini';
+        if (getAllEvents(ds).length > 0) cls += ' has-event';
+        miniDays += `<div class="${cls}">${day}</div>`;
+      }
+    }
+
+    html += `
+      <div class="mini-month" onclick="goToMonthYear(${yr},${m})">
+        <div class="mini-month-header">${yr}년 ${monthNames[m]}</div>
+        <div class="mini-day-headers">
+          <div class="mini-day-header sun">일</div>
+          <div class="mini-day-header">월</div><div class="mini-day-header">화</div>
+          <div class="mini-day-header">수</div><div class="mini-day-header">목</div>
+          <div class="mini-day-header">금</div><div class="mini-day-header">토</div>
+        </div>
+        <div class="mini-days">${miniDays}</div>
+      </div>`;
+  });
+  document.getElementById('yearlyView').innerHTML = html;
+}
+
+function openPopup(ds) {
+  selectedDateStr = ds;
+  selectedColorIdx = 0;
+  const [y, m, d] = ds.split('-').map(Number);
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('popupDate').textContent = `${y}년 ${months[m-1]} ${d}일`;
+
+  const schoolEvts = SCHOOL_EVENTS[ds] || [];
+  const userEvts = eventsCache[ds] || [];
+  let evHtml = '';
+
+  if (schoolEvts.length > 0 || userEvts.length > 0) {
+    evHtml += `<div class="popup-section-title" style="margin-bottom:8px">📋 이 날의 일정</div>`;
+    schoolEvts.forEach(ev => {
+      const c = ev.color || COLORS[0];
+      evHtml += `<div class="existing-event-item" style="background:${c.bg}">
+        <span style="color:${c.text};font-weight:600">${ev.title}</span>
+        <span style="font-size:10px;color:#aaa">학사일정</span>
+      </div>`;
+    });
+    userEvts.forEach((ev, idx) => {
+      const c = ev.color || COLORS[2];
+      evHtml += `<div class="existing-event-item" style="background:${c.bg}">
+        <span style="color:${c.text};font-weight:600">${ev.title}</span>
+        <button class="event-delete-btn" onclick="confirmDelete('${ds}',${idx})">✕</button>
+      </div>`;
+    });
+    evHtml += `<hr style="border:none;border-top:1px solid #fdeee4;margin:10px 0"/>`;
+  }
+  document.getElementById('existingEvents').innerHTML = evHtml;
+
+  let colorHtml = '';
+  COLORS.forEach((c, i) => {
+    colorHtml += `<div class="color-opt ${i===0?'selected':''}" style="background:${c.bg};border-color:${i===0?c.text:'transparent'}" onclick="selectColor(${i})" title="${c.name}"></div>`;
+  });
+  document.getElementById('colorPicker').innerHTML = colorHtml;
+  document.getElementById('eventInput').value = '';
+  document.getElementById('popupOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('eventInput').focus(), 100);
+}
+
+function selectColor(idx) {
+  selectedColorIdx = idx;
+  document.querySelectorAll('.color-opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+    el.style.borderColor = i === idx ? COLORS[i].text : 'transparent';
+  });
+}
+
+async function addEvent() {
+  const title = document.getElementById('eventInput').value.trim();
+  if (!title) return;
+  const color = COLORS[selectedColorIdx];
+
+  if (!eventsCache[selectedDateStr]) eventsCache[selectedDateStr] = [];
+  eventsCache[selectedDateStr].push({title, color});
+
+  setLoading(true);
+  await apiAdd(selectedDateStr, title, color);
+  setLoading(false);
+  setSyncStatus('✓ 저장됨', 'ok');
+
+  closePopupBtn();
+  render();
+}
+
+function closePopup(e) { if (e.target === document.getElementById('popupOverlay')) closePopupBtn(); }
+function closePopupBtn() { document.getElementById('popupOverlay').classList.remove('show'); }
+
+function confirmDelete(ds, idx) {
+  deleteTarget = {ds, idx};
+  const title = eventsCache[ds]?.[idx]?.title || '이 일정';
+  document.getElementById('confirmMsg').textContent = `"${title}"을(를) 삭제하시겠어요?`;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm() { deleteTarget = null; document.getElementById('confirmOverlay').classList.remove('show'); }
+
+async function doDelete() {
+  if (!deleteTarget) return;
+  const {ds, idx} = deleteTarget;
+  const title = eventsCache[ds]?.[idx]?.title;
+
+  if (eventsCache[ds]) {
+    eventsCache[ds].splice(idx, 1);
+    if (eventsCache[ds].length === 0) delete eventsCache[ds];
+  }
+
+  setLoading(true);
+  await apiDelete(ds, title);
+  setLoading(false);
+  setSyncStatus('✓ 삭제됨', 'ok');
+
+  closeConfirm();
+  openPopup(selectedDateStr);
+  render();
+}
+
+function switchView(v) {
+  currentView = v;
+  document.getElementById('monthlyView').style.display = v === 'monthly' ? 'block' : 'none';
+  document.getElementById('yearlyView').style.display = v === 'yearly' ? 'grid' : 'none';
+  document.getElementById('btnMonthly').classList.toggle('active', v === 'monthly');
+  document.getElementById('btnYearly').classList.toggle('active', v === 'yearly');
+  render();
+}
+
+function goToMonthYear(yr, m) {
+  currentYear = yr; currentMonth = m;
+  currentSchoolYear = getSchoolYear(yr, m);
+  switchView('monthly');
+}
+
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  currentSchoolYear = getSchoolYear(currentYear, currentMonth);
+  updateYearLabel(); render();
+}
+
+function changeYear(delta) {
+  currentSchoolYear += delta;
+  currentYear = currentSchoolYear;
+  currentMonth = 2;
+  updateYearLabel(); render();
+}
+
+function render() {
+  if (currentView === 'monthly') renderMonthly();
+  else renderYearly();
+}
+
+const todayYear = today.getFullYear();
+const todayMonth = today.getMonth();
+currentSchoolYear = getSchoolYear(todayYear, todayMonth);
+if (currentSchoolYear === 2026) {
+  currentYear = todayYear; currentMonth = todayMonth;
+} else {
+  currentSchoolYear = 2026; currentYear = 2026; currentMonth = 2;
+}
+updateYearLabel();
+render();
+initStorage();
+</script>
+</body>
+</html>
