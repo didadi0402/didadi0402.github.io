@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>늘봄지원실 업무 달력</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: #f4f0fb; min-height: 100vh; color: #333; }
+
+/* 헤더 */
+header {
+  background: linear-gradient(135deg, #7c6fcd, #a78bda);
+  padding: 20px 20px 16px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
+header h1 { font-family: 'Jua', sans-serif; font-size: 24px; color: white; letter-spacing: 2px; margin-bottom: 4px; }
+header p { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+/* 뷰 전환 */
+.view-controls {
+  display: flex; justify-content: center; align-items: center;
+  gap: 12px; padding: 14px 16px 10px;
+}
+.view-btn {
+  padding: 7px 20px; border-radius: 20px; border: 2px solid #b39ddb;
+  background: white; font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px; font-weight: 700; color: #7c6fcd; cursor: pointer;
+  transition: all 0.2s;
+}
+.view-btn.active { background: #7c6fcd; color: white; border-color: #7c6fcd; }
+.year-nav { display: flex; align-items: center; gap: 10px; }
+.year-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #b39ddb;
+  background: white; color: #7c6fcd; font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.year-btn:hover { background: #7c6fcd; color: white; }
+.year-label { font-family: 'Jua', sans-serif; font-size: 16px; color: #7c6fcd; min-width: 100px; text-align: center; }
+
+/* 범례 */
+.legend {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 12px; padding: 0 16px 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+/* 월별 보기 */
+.monthly-view { max-width: 860px; margin: 0 auto; padding: 0 12px 30px; }
+.month-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0 14px;
+}
+.month-nav-btn {
+  padding: 6px 16px; border-radius: 20px; border: 2px solid #b39ddb;
+  background: white; color: #7c6fcd; font-family: 'Jua', sans-serif;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.month-nav-btn:hover { background: #7c6fcd; color: white; }
+.month-title { font-family: 'Jua', sans-serif; font-size: 22px; color: #5a4fa0; letter-spacing: 1px; }
+
+.calendar-grid { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(124,111,205,0.1); }
+.day-headers { display: grid; grid-template-columns: repeat(7,1fr); background: #7c6fcd; }
+.day-header {
+  padding: 10px 0; text-align: center;
+  font-size: 12px; font-weight: 700; color: white; letter-spacing: 1px;
+}
+.day-header.sun { color: #ffc1c1; }
+.day-header.sat { color: white; }
+
+.calendar-days { display: grid; grid-template-columns: repeat(7,1fr); }
+.day-cell {
+  min-height: 90px; border-right: 1px solid #f0edf9;
+  border-bottom: 1px solid #f0edf9; padding: 6px 5px 4px;
+  cursor: pointer; transition: background 0.15s; position: relative;
+  vertical-align: top;
+}
+.day-cell:hover { background: #faf8ff; }
+.day-cell.other-month { background: #faf8ff; opacity: 0.5; cursor: default; }
+.day-cell.today { box-shadow: inset 0 0 0 2px #7c6fcd; }
+.day-cell.vacation { background: #e8f4fd; }
+.day-cell.vacation:hover { background: #d8ecf8; }
+
+.day-number {
+  font-size: 13px; font-weight: 700; display: inline-block;
+  width: 24px; height: 24px; border-radius: 50%;
+  text-align: center; line-height: 24px; margin-bottom: 2px;
+  color: #333;
+}
+.day-number.sunday, .day-number.holiday { color: #e53935; }
+.day-number.today-num {
+  background: #7c6fcd; color: white !important;
+  box-shadow: 0 2px 6px rgba(124,111,205,0.4);
+}
+
+.event-chip {
+  display: block; font-size: 10px; padding: 1px 5px;
+  border-radius: 4px; margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.event-chip:hover { opacity: 0.8; }
+.more-events { font-size: 10px; color: #9e8dc4; padding-left: 2px; cursor: pointer; }
+
+.holiday-name { font-size: 9px; color: #e53935; display: block; margin-bottom: 1px; font-weight: 600; }
+.vacation-label { font-size: 9px; color: #1a7fc1; display: block; margin-bottom: 1px; font-weight: 600; }
+
+/* 연간 보기 */
+.yearly-view {
+  max-width: 1100px; margin: 0 auto; padding: 0 12px 30px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.mini-month { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 8px rgba(124,111,205,0.08); cursor: pointer; transition: all 0.2s; }
+.mini-month:hover { box-shadow: 0 4px 16px rgba(124,111,205,0.2); transform: translateY(-2px); }
+.mini-month-header {
+  background: #7c6fcd; padding: 8px; text-align: center;
+  font-family: 'Jua', sans-serif; font-size: 13px; color: white; letter-spacing: 1px;
+}
+.mini-day-headers { display: grid; grid-template-columns: repeat(7,1fr); background: #ede9f9; }
+.mini-day-header { padding: 3px 0; text-align: center; font-size: 8px; font-weight: 700; color: #7c6fcd; }
+.mini-day-header.sun { color: #e53935; }
+.mini-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 2px; }
+.mini-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; border-radius: 3px; margin: 1px;
+}
+.mini-day.other { opacity: 0.3; }
+.mini-day.vacation { background: #cce8fa; }
+.mini-day.holiday-day { color: #e53935; font-weight: 700; }
+.mini-day.today-mini { background: #7c6fcd; color: white; border-radius: 50%; font-weight: 700; }
+.mini-day.has-event { position: relative; }
+.mini-day.has-event::after {
+  content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px; background: #7c6fcd; border-radius: 50%;
+}
+
+/* 팝업 */
+.popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; display: none;
+}
+.popup-overlay.show { display: flex; }
+.popup {
+  background: white; border-radius: 16px; width: 320px; max-width: 90vw;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden;
+}
+.popup-header {
+  background: linear-gradient(135deg, #7c6fcd, #a78bda);
+  padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
+}
+.popup-title { font-family: 'Jua', sans-serif; font-size: 16px; color: white; letter-spacing: 1px; }
+.popup-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; line-height: 1; }
+.popup-body { padding: 16px; }
+
+.existing-events { margin-bottom: 12px; }
+.existing-event-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 8px; border-radius: 8px; margin-bottom: 4px;
+  font-size: 12px;
+}
+.event-delete-btn {
+  background: none; border: none; color: #aaa; cursor: pointer;
+  font-size: 14px; padding: 0 2px; transition: color 0.15s;
+}
+.event-delete-btn:hover { color: #e53935; }
+
+.popup-section-title { font-size: 12px; font-weight: 700; color: #7c6fcd; margin-bottom: 8px; }
+.popup input[type="text"] {
+  width: 100%; padding: 9px 12px; border: 2px solid #e0d9f7;
+  border-radius: 8px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px;
+  outline: none; margin-bottom: 8px; transition: border-color 0.2s;
+}
+.popup input[type="text"]:focus { border-color: #7c6fcd; }
+
+.color-picker { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.color-opt {
+  width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.15s;
+}
+.color-opt.selected { border-color: #333; transform: scale(1.15); }
+
+.popup-add-btn {
+  width: 100%; padding: 10px; background: #7c6fcd; border: none;
+  border-radius: 10px; color: white; font-family: 'Jua', sans-serif;
+  font-size: 14px; cursor: pointer; transition: background 0.2s; letter-spacing: 1px;
+}
+.popup-add-btn:hover { background: #6a5bbf; }
+
+/* 로딩바 */
+#loadingBar {
+  display: none; position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; background: linear-gradient(90deg, #7c6fcd, #a78bda, #7c6fcd);
+  background-size: 200% 100%;
+  animation: loadingAnim 1.2s infinite;
+  z-index: 999;
+}
+@keyframes loadingAnim {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center; z-index: 300;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-box {
+  background: white; border-radius: 14px; padding: 24px 20px;
+  width: 280px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.confirm-box p { font-size: 14px; color: #444; margin-bottom: 18px; line-height: 1.6; }
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-btn {
+  flex: 1; padding: 9px; border-radius: 8px; border: none;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.confirm-cancel { background: #f0edf9; color: #7c6fcd; }
+.confirm-delete { background: #e53935; color: white; }
+</style>
+</head>
+<body>
+
+<div id="loadingBar"></div>
+<header>
+  <h1>늘봄지원실 업무 달력</h1>
+  <p>성환초등학교 2026학년도 학사일정</p>
+</header>
+
+<div class="view-controls">
+  <button class="view-btn active" id="btnMonthly" onclick="switchView('monthly')">월별 보기</button>
+  <div class="year-nav">
+    <button class="year-btn" onclick="changeYear(-1)">‹</button>
+    <span class="year-label" id="yearLabel">2026학년도</span>
+    <button class="year-btn" onclick="changeYear(1)">›</button>
+  </div>
+  <button class="view-btn" id="btnYearly" onclick="switchView('yearly')">연간 보기</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#ffc1c1"></div> 공휴일</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#cce8fa"></div> 방학</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e8d5f5"></div> 학교 행사</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c8f0d8"></div> 늘봄 업무</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fde68a"></div> 기타</div>
+  <div class="legend-item" style="border: 2px solid #7c6fcd; border-radius:3px; padding:0 4px;">오늘</div>
+</div>
+
+<div id="monthlyView" class="monthly-view">
+  <div class="month-nav">
+    <button class="month-nav-btn" onclick="changeMonth(-1)">‹ 이전달</button>
+    <span class="month-title" id="monthTitle"></span>
+    <button class="month-nav-btn" onclick="changeMonth(1)">다음달 ›</button>
+  </div>
+  <div class="calendar-grid">
+    <div class="day-headers">
+      <div class="day-header sun">일</div>
+      <div class="day-header">월</div>
+      <div class="day-header">화</div>
+      <div class="day-header">수</div>
+      <div class="day-header">목</div>
+      <div class="day-header">금</div>
+      <div class="day-header sat">토</div>
+    </div>
+    <div class="calendar-days" id="calendarDays"></div>
+  </div>
+</div>
+
+<div id="yearlyView" class="yearly-view" style="display:none"></div>
+
+<!-- 일정 추가 팝업 -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup">
+    <div class="popup-header">
+      <span class="popup-title" id="popupDate">날짜</span>
+      <button class="popup-close" onclick="closePopupBtn()">✕</button>
+    </div>
+    <div class="popup-body">
+      <div class="existing-events" id="existingEvents"></div>
+      <div class="popup-section-title">+ 일정 추가</div>
+      <input type="text" id="eventInput" placeholder="일정 제목 입력..." onkeydown="if(event.key==='Enter') addEvent()"/>
+      <div style="font-size:11px;color:#999;margin-bottom:6px;">색상 선택</div>
+      <div class="color-picker" id="colorPicker"></div>
+      <button class="popup-add-btn" onclick="addEvent()">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMsg">이 일정을 삭제하시겠어요?</p>
+    <div class="confirm-btns">
+      <button class="confirm-btn confirm-cancel" onclick="closeConfirm()">취소</button>
+      <button class="confirm-btn confirm-delete" onclick="doDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 데이터 =====
+const COLORS = [
+  {name:'학교행사', bg:'#e8d5f5', text:'#6a3fa0'},
+  {name:'늘봄업무', bg:'#c8f0d8', text:'#1a7a45'},
+  {name:'기타',     bg:'#fde68a', text:'#92650a'},
+  {name:'중요',     bg:'#ffd5d5', text:'#c0392b'},
+  {name:'파랑',     bg:'#cce8fa', text:'#1a5fa0'},
+  {name:'회색',     bg:'#e8e8e8', text:'#555555'},
+];
+
+// 공휴일
+const HOLIDAYS = {
+  '2026-01-01': '신정',
+  '2026-01-29': '설연휴',
+  '2026-01-30': '설날',
+  '2026-01-31': '설연휴',
+  '2026-02-02': '대체공휴일',
+  '2026-03-01': '3.1절',
+  '2026-03-02': '대체공휴일',
+  '2026-05-05': '어린이날',
+  '2026-05-24': '부처님오신날',
+  '2026-05-25': '대체공휴일',
+  '2026-06-03': '전국동시지방선거',
+  '2026-06-06': '현충일',
+  '2026-07-17': '제헌절',
+  '2026-08-15': '광복절',
+  '2026-08-17': '대체공휴일',
+  '2026-09-24': '추석연휴',
+  '2026-09-25': '추석',
+  '2026-09-26': '추석연휴',
+  '2026-10-03': '개천절',
+  '2026-10-05': '대체공휴일',
+  '2026-10-09': '한글날',
+  '2026-12-25': '성탄절',
+  '2027-01-01': '신정',
+  '2027-01-28': '설연휴',
+  '2027-01-29': '설날',
+  '2027-01-30': '설연휴',
+};
+
+// 방학 기간
+function isVacation(dateStr) {
+  const d = new Date(dateStr);
+  // 여름방학: 2026-07-28 ~ 2026-08-23
+  if (d >= new Date('2026-07-28') && d <= new Date('2026-08-23')) return true;
+  // 겨울방학: 2027-01-06 ~ 2027-02-28
+  if (d >= new Date('2027-01-06') && d <= new Date('2027-02-28')) return true;
+  return false;
+}
+
+// 학사 일정 (파일에서 추출)
+const SCHOOL_EVENTS = {
+  '2026-03-03': [{title:'시업식·입학식', color: COLORS[0]}],
+  '2026-03-12': [{title:'1학기 전교임원선거', color: COLORS[0]}],
+  '2026-03-13': [{title:'1학기 학급임원선거', color: COLORS[0]}],
+  '2026-03-20': [{title:'교육과정 설명회', color: COLORS[0]}, {title:'학부모회 조직', color: COLORS[0]}],
+  '2026-03-28': [{title:'영재학급 시업식', color: COLORS[0]}],
+  '2026-04-30': [{title:'찾아가는 예술마당(4~6학년)', color: COLORS[0]}],
+  '2026-05-28': [{title:'소방서 합동소방훈련(예정)', color: COLORS[3]}],
+  '2026-06-29': [{title:'방과후 1학기 만족도 조사 시작', color: COLORS[1]}],
+  '2026-07-27': [{title:'여름방학식', color: COLORS[0]}],
+  '2026-07-28': [{title:'1학기 영어캠프 시작', color: COLORS[0]}, {title:'여름방학 방과후학교 시작', color: COLORS[1]}],
+  '2026-08-24': [{title:'개학식', color: COLORS[0]}],
+  '2026-08-27': [{title:'2학기 전교임원선거', color: COLORS[0]}],
+  '2026-08-28': [{title:'2학기 학급임원선거', color: COLORS[0]}],
+  '2026-10-21': [{title:'하반기 자체소방훈련(예정)', color: COLORS[3]}],
+  '2026-10-27': [{title:'학부모 공개수업', color: COLORS[0]}],
+  '2026-11-07': [{title:'영재학급 수료식(예정)', color: COLORS[0]}],
+  '2026-12-05': [{title:'종업식·졸업식', color: COLORS[0]}, {title:'2학기 영어캠프 시작', color: COLORS[0]}],
+  '2026-12-06': [{title:'겨울방학 방과후학교 시작', color: COLORS[1]}],
+  '2026-12-07': [{title:'방과후 2학기 만족도 조사 시작', color: COLORS[1]}],
+};
+
+// ===== 상태 =====
+// currentSchoolYear: 학년도 (2026 = 2026.3~2027.2)
+// currentYear/currentMonth: 월별 보기에서 현재 실제 연월
+let currentSchoolYear = 2026;
+let currentYear = 2026;
+let currentMonth = 2; // 3월(0-indexed)
+let currentView = 'monthly';
+let selectedDateStr = '';
+let selectedColorIdx = 0;
+let deleteTarget = null;
+
+// 실제 연월 → 학년도 (3~12월은 해당연도, 1~2월은 전년도)
+function getSchoolYear(year, month) {
+  return (month >= 2) ? year : year - 1;
+}
+
+// 학년도 레이블 업데이트
+function updateYearLabel() {
+  document.getElementById('yearLabel').textContent = `${currentSchoolYear}학년도`;
+}
+
+// ===== Google Sheets 저장소 (어디서든 동기화) =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbxTJpwu6JAbN3Cxk3madgmhxC4lmks1lvcYyxDXtq6SSXVoHJsk8HVg1-7HILCelOkh/exec';
+let eventsCache = {};
+let storageReady = false;
+
+// 로딩 상태 표시
+function setLoading(on) {
+  const el = document.getElementById('loadingBar');
+  if (el) el.style.display = on ? 'block' : 'none';
+}
+
+async function initStorage() {
+  setLoading(true);
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    if (data.ok) eventsCache = data.events || {};
+  } catch (e) {
+    console.error('불러오기 실패:', e);
+    eventsCache = {};
+  }
+  storageReady = true;
+  setLoading(false);
+  render();
+}
+
+function loadEvents() {
+  return eventsCache;
+}
+
+async function saveEvents(evts) {
+  eventsCache = evts;
+}
+
+async function apiAdd(dateStr, title, color) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'add',
+        date: dateStr,
+        title,
+        bg: color.bg,
+        text: color.text
+      })
+    });
+  } catch (e) { console.error('추가 실패:', e); }
+}
+
+async function apiDelete(dateStr, title) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'delete',
+        date: dateStr,
+        title
+      })
+    });
+  } catch (e) { console.error('삭제 실패:', e); }
+}
+
+function getAllEvents(dateStr) {
+  const school = SCHOOL_EVENTS[dateStr] || [];
+  const user = loadEvents()[dateStr] || [];
+  return [...school, ...user];
+}
+
+function dateStr(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+const today = new Date();
+const todayStr = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
+
+// ===== 월별 보기 =====
+function renderMonthly() {
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const sy = getSchoolYear(currentYear, currentMonth);
+  document.getElementById('monthTitle').textContent = `${sy}학년도 ${months[currentMonth]}`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+
+  let html = '';
+  let totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    let day, month, year, isOther = false;
+    if (i < firstDay) {
+      day = daysInPrev - firstDay + i + 1;
+      month = currentMonth - 1;
+      year = currentYear;
+      if (month < 0) { month = 11; year--; }
+      isOther = true;
+    } else if (i >= firstDay + daysInMonth) {
+      day = i - firstDay - daysInMonth + 1;
+      month = currentMonth + 1;
+      year = currentYear;
+      if (month > 11) { month = 0; year++; }
+      isOther = true;
+    } else {
+      day = i - firstDay + 1;
+      month = currentMonth;
+      year = currentYear;
+    }
+
+    const ds = dateStr(year, month, day);
+    const dow = i % 7; // 0=일
+    const isToday = ds === todayStr;
+    const isHoliday = !!HOLIDAYS[ds];
+    const isVac = isVacation(ds);
+    const events = isOther ? [] : getAllEvents(ds);
+
+    let cellClass = 'day-cell';
+    if (isOther) cellClass += ' other-month';
+    if (isToday) cellClass += ' today';
+    if (isVac && !isOther) cellClass += ' vacation';
+
+    let numClass = 'day-number';
+    if (dow === 0 || isHoliday) numClass += ' sunday holiday';
+    if (isToday) numClass += ' today-num';
+
+    let inner = '';
+    if (isVac && !isOther) inner += `<span class="vacation-label">방학</span>`;
+    if (isHoliday && !isOther) inner += `<span class="holiday-name">${HOLIDAYS[ds]}</span>`;
+
+    // 이벤트 칩
+    const shown = events.slice(0, 2);
+    const extra = events.length - 2;
+    shown.forEach(ev => {
+      const c = ev.color || COLORS[2];
+      inner += `<span class="event-chip" style="background:${c.bg};color:${c.text}" title="${ev.title}">${ev.title}</span>`;
+    });
+    if (extra > 0) inner += `<span class="more-events">+${extra}개 더</span>`;
+
+    const clickAttr = isOther ? '' : `onclick="openPopup('${ds}')"`;
+    html += `<div class="${cellClass}" ${clickAttr}>
+      <span class="${numClass}">${day}</span>
+      ${inner}
+    </div>`;
+  }
+  document.getElementById('calendarDays').innerHTML = html;
+}
+
+// ===== 연간 보기 (학년도 기준: 3월~다음해 2월) =====
+function renderYearly() {
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  let html = '';
+
+  // 학년도: currentSchoolYear년 3월 ~ (currentSchoolYear+1)년 2월
+  // 12개월: 3,4,5,6,7,8,9,10,11,12,1,2
+  const schoolMonths = [
+    {year: currentSchoolYear,   month: 2},  // 3월 (0-indexed)
+    {year: currentSchoolYear,   month: 3},  // 4월
+    {year: currentSchoolYear,   month: 4},  // 5월
+    {year: currentSchoolYear,   month: 5},  // 6월
+    {year: currentSchoolYear,   month: 6},  // 7월
+    {year: currentSchoolYear,   month: 7},  // 8월
+    {year: currentSchoolYear,   month: 8},  // 9월
+    {year: currentSchoolYear,   month: 9},  // 10월
+    {year: currentSchoolYear,   month: 10}, // 11월
+    {year: currentSchoolYear,   month: 11}, // 12월
+    {year: currentSchoolYear+1, month: 0},  // 1월
+    {year: currentSchoolYear+1, month: 1},  // 2월
+  ];
+
+  schoolMonths.forEach(({year: yr, month: m}) => {
+    const firstDay = new Date(yr, m, 1).getDay();
+    const daysInMonth = new Date(yr, m + 1, 0).getDate();
+
+    let miniDays = '';
+    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+    for (let i = 0; i < totalCells; i++) {
+      let day, isOther = false;
+      if (i < firstDay) { isOther = true; day = ''; }
+      else if (i >= firstDay + daysInMonth) { isOther = true; day = ''; }
+      else { day = i - firstDay + 1; }
+
+      if (!isOther && day) {
+        const ds = dateStr(yr, m, day);
+        const isHol = !!HOLIDAYS[ds];
+        const isVac = isVacation(ds);
+        const isT = ds === todayStr;
+        const hasEv = getAllEvents(ds).length > 0;
+        const dow = i % 7;
+        let cls = 'mini-day';
+        if (isVac) cls += ' vacation';
+        if (isHol || dow === 0) cls += ' holiday-day';
+        if (isT) cls += ' today-mini';
+        if (hasEv) cls += ' has-event';
+        miniDays += `<div class="${cls}">${day}</div>`;
+      } else {
+        miniDays += `<div class="mini-day other"></div>`;
+      }
+    }
+
+    const headerLabel = `${yr}년 ${monthNames[m]}`;
+    html += `
+      <div class="mini-month" onclick="goToMonthYear(${yr}, ${m})">
+        <div class="mini-month-header">${headerLabel}</div>
+        <div class="mini-day-headers">
+          <div class="mini-day-header sun">일</div>
+          <div class="mini-day-header">월</div>
+          <div class="mini-day-header">화</div>
+          <div class="mini-day-header">수</div>
+          <div class="mini-day-header">목</div>
+          <div class="mini-day-header">금</div>
+          <div class="mini-day-header">토</div>
+        </div>
+        <div class="mini-days">${miniDays}</div>
+      </div>`;
+  });
+
+  document.getElementById('yearlyView').innerHTML = html;
+}
+
+// ===== 팝업 =====
+function openPopup(ds) {
+  selectedDateStr = ds;
+  selectedColorIdx = 0;
+
+  // 날짜 제목
+  const [y, m, d] = ds.split('-').map(Number);
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('popupDate').textContent = `${y}년 ${months[m-1]} ${d}일`;
+
+  // 기존 일정 목록 (학교 일정은 삭제 불가, 사용자 일정만 삭제 가능)
+  const schoolEvts = SCHOOL_EVENTS[ds] || [];
+  const userEvts = loadEvents()[ds] || [];
+  let evHtml = '';
+
+  if (schoolEvts.length > 0 || userEvts.length > 0) {
+    evHtml += `<div class="popup-section-title" style="margin-bottom:8px">📋 이 날의 일정</div>`;
+    schoolEvts.forEach(ev => {
+      const c = ev.color || COLORS[0];
+      evHtml += `<div class="existing-event-item" style="background:${c.bg}">
+        <span style="color:${c.text};font-weight:600">${ev.title}</span>
+        <span style="font-size:10px;color:#aaa">학사일정</span>
+      </div>`;
+    });
+    userEvts.forEach((ev, idx) => {
+      const c = ev.color || COLORS[2];
+      evHtml += `<div class="existing-event-item" style="background:${c.bg}">
+        <span style="color:${c.text};font-weight:600">${ev.title}</span>
+        <button class="event-delete-btn" onclick="confirmDelete('${ds}',${idx})">✕</button>
+      </div>`;
+    });
+    evHtml += `<hr style="border:none;border-top:1px solid #f0edf9;margin:10px 0"/>`;
+  }
+  document.getElementById('existingEvents').innerHTML = evHtml;
+
+  // 색상 선택
+  let colorHtml = '';
+  COLORS.forEach((c, i) => {
+    colorHtml += `<div class="color-opt ${i===0?'selected':''}" style="background:${c.bg};border-color:${i===0?c.text:'transparent'}" onclick="selectColor(${i})" title="${c.name}"></div>`;
+  });
+  document.getElementById('colorPicker').innerHTML = colorHtml;
+
+  document.getElementById('eventInput').value = '';
+  document.getElementById('popupOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('eventInput').focus(), 100);
+}
+
+function selectColor(idx) {
+  selectedColorIdx = idx;
+  document.querySelectorAll('.color-opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+    el.style.borderColor = i === idx ? COLORS[i].text : 'transparent';
+  });
+}
+
+async function addEvent() {
+  const title = document.getElementById('eventInput').value.trim();
+  if (!title) return;
+  const color = COLORS[selectedColorIdx];
+
+  // 캐시 업데이트
+  if (!eventsCache[selectedDateStr]) eventsCache[selectedDateStr] = [];
+  eventsCache[selectedDateStr].push({ title, color });
+
+  // Google Sheets에 저장
+  setLoading(true);
+  await apiAdd(selectedDateStr, title, color);
+  setLoading(false);
+
+  closePopupBtn();
+  render();
+}
+
+function closePopup(e) {
+  if (e.target === document.getElementById('popupOverlay')) closePopupBtn();
+}
+function closePopupBtn() {
+  document.getElementById('popupOverlay').classList.remove('show');
+}
+
+// ===== 삭제 =====
+function confirmDelete(ds, idx) {
+  deleteTarget = { ds, idx };
+  const evts = loadEvents();
+  const title = evts[ds]?.[idx]?.title || '이 일정';
+  document.getElementById('confirmMsg').textContent = `"${title}"을(를) 삭제하시겠어요?`;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm() {
+  deleteTarget = null;
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+async function doDelete() {
+  if (!deleteTarget) return;
+  const { ds, idx } = deleteTarget;
+  const title = eventsCache[ds]?.[idx]?.title;
+
+  // 캐시 업데이트
+  if (eventsCache[ds]) {
+    eventsCache[ds].splice(idx, 1);
+    if (eventsCache[ds].length === 0) delete eventsCache[ds];
+  }
+
+  // Google Sheets에서 삭제
+  setLoading(true);
+  await apiDelete(ds, title);
+  setLoading(false);
+
+  closeConfirm();
+  openPopup(selectedDateStr);
+  render();
+}
+
+// ===== 뷰 전환 =====
+function switchView(v) {
+  currentView = v;
+  document.getElementById('monthlyView').style.display = v === 'monthly' ? 'block' : 'none';
+  document.getElementById('yearlyView').style.display = v === 'yearly' ? 'grid' : 'none';
+  document.getElementById('btnMonthly').classList.toggle('active', v === 'monthly');
+  document.getElementById('btnYearly').classList.toggle('active', v === 'yearly');
+  render();
+}
+
+// 연간 보기에서 미니 달력 클릭 → 해당 월로 이동
+function goToMonthYear(yr, m) {
+  currentYear = yr;
+  currentMonth = m;
+  currentSchoolYear = getSchoolYear(yr, m);
+  switchView('monthly');
+}
+
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  currentSchoolYear = getSchoolYear(currentYear, currentMonth);
+  updateYearLabel();
+  render();
+}
+
+// 학년도 단위로 이동 (← 2026학년도 →)
+function changeYear(delta) {
+  currentSchoolYear += delta;
+  // 학년도 시작월(3월)로 이동
+  currentYear = currentSchoolYear;
+  currentMonth = 2; // 3월
+  updateYearLabel();
+  render();
+}
+
+function render() {
+  if (currentView === 'monthly') renderMonthly();
+  else renderYearly();
+}
+
+// 초기 실행 - 오늘 날짜 기준으로 학년도·월 설정
+const todayYear = today.getFullYear();
+const todayMonth = today.getMonth(); // 0-indexed
+currentSchoolYear = getSchoolYear(todayYear, todayMonth);
+// 2026학년도 범위(2026.3~2027.2) 안에 있으면 오늘 월로, 아니면 2026학년도 3월로
+if (currentSchoolYear === 2026) {
+  currentYear = todayYear;
+  currentMonth = todayMonth;
+} else {
+  currentSchoolYear = 2026;
+  currentYear = 2026;
+  currentMonth = 2;
+}
+updateYearLabel();
+render(); // 저장소 로드 전 기본 렌더링
+initStorage(); // Artifact 저장소에서 일정 불러오기
+</script>
+</body>
+</html>
