@@ -410,9 +410,23 @@ function setLoading(on) {
 async function initStorage() {
   setLoading(true);
   try {
-    const res = await fetch(API_URL, { method: 'GET' });
-    const data = await res.json();
-    if (data.ok) eventsCache = data.events || {};
+    await new Promise((resolve, reject) => {
+      const callbackName = 'calendarCallback_' + Date.now();
+      const script = document.createElement('script');
+
+      window[callbackName] = (data) => {
+        if (data.ok) eventsCache = data.events || {};
+        delete window[callbackName];
+        document.body.removeChild(script);
+        resolve();
+      };
+
+      script.src = `${API_URL}?callback=${callbackName}`;
+      script.onerror = () => { reject(); resolve(); };
+      document.body.appendChild(script);
+
+      setTimeout(resolve, 5000); // 5초 타임아웃
+    });
   } catch (e) {
     console.error('불러오기 실패:', e);
     eventsCache = {};
