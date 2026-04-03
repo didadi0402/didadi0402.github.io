@@ -256,7 +256,7 @@ header p { font-size: 12px; color: rgba(255,255,255,0.8); }
 // =============================================
 // ★ 여기에 새 Apps Script URL을 붙여넣으세요 ★
 // =============================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbxv5CwM9XQKCtud4i9YHpJQPUprZO1ac4ADFVv-tn8X0FJgjyyilwDvno5095L29Pfp/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx8nDjDxvkWXG5mxZXgLwQr-riBIqKBaFrWWEb_C-E57uoXKglgC-nUbCw8fg05eZSE/exec';
 
 // ===== 색상 =====
 const COLORS = [
@@ -388,25 +388,40 @@ async function initStorage() {
   render();
 }
 
+function jsonpRequest(params) {
+  return new Promise((resolve) => {
+    const cbName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    const query = Object.entries({...params, callback: cbName})
+      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+    let done = false;
+
+    window[cbName] = (data) => {
+      done = true;
+      delete window[cbName];
+      if (script.parentNode) document.body.removeChild(script);
+      resolve(data);
+    };
+
+    script.onerror = () => { if (!done) { delete window[cbName]; resolve({}); } };
+    script.src = `${API_URL}?${query}`;
+    document.body.appendChild(script);
+
+    setTimeout(() => {
+      if (!done) { done = true; delete window[cbName]; if (script.parentNode) document.body.removeChild(script); resolve({}); }
+    }, 6000);
+  });
+}
+
 async function apiAdd(dateStr, title, color) {
   try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'text/plain'},
-      body: JSON.stringify({action:'add', date:dateStr, title, bg:color.bg, text:color.text})
-    });
+    await jsonpRequest({action:'add', date:dateStr, title, bg:color.bg, text:color.text});
   } catch(e) { console.error('추가 실패:', e); }
 }
 
 async function apiDelete(dateStr, title) {
   try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'text/plain'},
-      body: JSON.stringify({action:'delete', date:dateStr, title})
-    });
+    await jsonpRequest({action:'delete', date:dateStr, title});
   } catch(e) { console.error('삭제 실패:', e); }
 }
 
