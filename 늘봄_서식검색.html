@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>늘봄지원실 서식 검색</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f0f9f4;
+    min-height: 100vh;
+    color: #333;
+  }
+
+  /* 헤더 */
+  header {
+    background: linear-gradient(135deg, #b39ddb, #ce93d8);
+    padding: 28px 20px 22px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+  }
+  header h1 {
+    font-family: 'Jua', sans-serif;
+    font-size: 26px;
+    color: white;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.5px;
+  }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+
+  /* 키워드 검색 */
+  .search-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(58,175,122,0.1);
+    margin-bottom: 16px;
+  }
+  .search-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3aaf7a;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+  }
+  .search-row input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #d4f0e4;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-row input:focus { border-color: #3aaf7a; }
+
+  /* 필터 버튼 */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #d4f0e4;
+    background: white;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: #3aaf7a;
+    border-color: #3aaf7a;
+    color: white;
+  }
+
+  /* 결과 수 */
+  .result-count {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .result-count span { color: #3aaf7a; font-weight: 700; }
+
+  /* 카드 목록 */
+  .form-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+
+  .form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .form-card:hover {
+    box-shadow: 0 4px 16px rgba(58,175,122,0.15);
+    transform: translateY(-1px);
+  }
+
+  .badge {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0px;
+  }
+  .badge.공문 { background: #e8f4fd; color: #5bc4e8; }
+  .badge.서식 { background: #e8f9f0; color: #3aaf7a; }
+  .badge.참고자료 { background: #fef9e7; color: #f0a500; }
+
+  .form-info { flex: 1; min-width: 0; }
+  .form-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #222;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .form-meta {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+  .form-id {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: #ccc;
+    font-weight: 500;
+  }
+
+  .no-result {
+    text-align: center;
+    padding: 40px;
+    color: #bbb;
+    font-size: 14px;
+    display: none;
+  }
+
+  /* AI 질문창 */
+  .ai-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(91,196,232,0.12);
+    border-top: 3px solid #5bc4e8;
+  }
+  .ai-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #5bc4e8;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .ai-box .hint {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+  .ai-row {
+    display: flex;
+    gap: 8px;
+  }
+  .ai-row input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #d4effa;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ai-row input:focus { border-color: #5bc4e8; }
+  .ai-row button {
+    padding: 12px 20px;
+    background: #5bc4e8;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .ai-row button:hover { background: #3aafd4; }
+  .ai-row button:disabled { background: #b0dff0; cursor: not-allowed; }
+
+  .ai-answer {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f0f9ff;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+    display: none;
+    white-space: pre-wrap;
+  }
+  .ai-answer.loading {
+    display: block;
+    color: #aaa;
+    font-style: italic;
+  }
+  .ai-answer.visible { display: block; }
+
+  .highlight { background: #fff3a3; border-radius: 3px; padding: 0 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>늘봄지원실 서식 검색</h1>
+  <p>충남 늘봄지원실 운영자 실무 도움자료 서식 모음 · 191개 서식</p>
+</header>
+
+<div class="container">
+
+  <!-- 키워드 즉시 검색 -->
+  <div class="search-box">
+    <label>🔍 키워드 검색 (즉시 필터)</label>
+    <div class="search-row">
+      <input type="text" id="keyword" placeholder="예: 출석부, 강사 계약서, 귀가일지..." oninput="filterForms()"/>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('전체')">전체</button>
+      <button class="filter-btn" onclick="setFilter('공문')">공문</button>
+      <button class="filter-btn" onclick="setFilter('서식')">서식</button>
+      <button class="filter-btn" onclick="setFilter('참고자료')">참고자료</button>
+      <button class="filter-btn" onclick="setFilter('1월')">1월</button>
+      <button class="filter-btn" onclick="setFilter('2월')">2월</button>
+      <button class="filter-btn" onclick="setFilter('3월')">3월</button>
+      <button class="filter-btn" onclick="setFilter('5월')">5월</button>
+      <button class="filter-btn" onclick="setFilter('6월')">6월</button>
+      <button class="filter-btn" onclick="setFilter('7월')">7월</button>
+      <button class="filter-btn" onclick="setFilter('10월')">10월</button>
+      <button class="filter-btn" onclick="setFilter('11월')">11월</button>
+      <button class="filter-btn" onclick="setFilter('12월')">12월</button>
+    </div>
+  </div>
+
+  <div class="result-count" id="resultCount"><span id="countNum">191</span>개의 서식</div>
+
+  <div class="form-list" id="formList"></div>
+  <div class="no-result" id="noResult">검색 결과가 없습니다 😥</div>
+
+  <!-- AI 질문창 -->
+  <div class="ai-box">
+    <label>🤖 AI에게 자세히 물어보기</label>
+    <p class="hint">예: "강사 계약할 때 필요한 서식이 뭐야?", "출석부는 언제 어떻게 제출해?"</p>
+    <div class="ai-row">
+      <input type="text" id="aiQuestion" placeholder="궁금한 점을 자유롭게 입력하세요..." onkeydown="if(event.key==='Enter') askAI()"/>
+      <button id="aiBtn" onclick="askAI()">질문하기</button>
+    </div>
+    <div class="ai-answer" id="aiAnswer"></div>
+  </div>
+
+</div>
+
+<script>
+const FORMS = [{"month":"1월","id":"01-01","type":"공문","name":"선택형 돌봄프로그램 신청 현황 및 추첨 계획"},{"month":"1월","id":"01-02","type":"공문","name":"선택형 돌봄프로그램 대상자 추첨 결과 보고"},{"month":"1월","id":"01-03","type":"공문","name":"◌학기 선택형 돌봄프로그램 반편성 결과 보고"},{"month":"1월","id":"01-04","type":"서식","name":"◌학기 선택형 돌봄프로그램 반편성 계획"},{"month":"1월","id":"01-05","type":"공문","name":"늘봄 프로그램 개인위탁 외부강사 모집"},{"month":"1월","id":"01-06","type":"서식","name":"늘봄 프로그램 개인위탁 외부강사 모집 공고"},{"month":"1월","id":"01-07","type":"서식","name":"늘봄 프로그램 운영 제안서"},{"month":"1월","id":"01-08","type":"서식","name":"늘봄 프로그램 개인위탁 외부강사 개인정보 수집 및 활용 동의서"},{"month":"1월","id":"01-09","type":"공문","name":"늘봄 프로그램 개인위탁 외부강사 선정위원회 실시"},{"month":"1월","id":"01-10","type":"서식","name":"늘봄 프로그램 개인위탁 외부강사 선정위원 청렴 및 보안 서약서"},{"month":"1월","id":"01-11","type":"서식","name":"늘봄 프로그램 운영 제안서와 운영 능력 평가표"},{"month":"1월","id":"01-12","type":"서식","name":"늘봄 프로그램 운영 능력 심사 평가표(예시)"},{"month":"1월","id":"01-13","type":"서식","name":"늘봄 프로그램 개인위탁 외부강사 심사 집계표"},{"month":"1월","id":"01-14","type":"공문","name":"늘봄 프로그램 개인위탁 외부강사 선정위원회 운영 제안서 심사 결과"},{"month":"1월","id":"01-15","type":"공문","name":"늘봄 프로그램 개인위탁 외부강사 선정위원회 운영 능력 심사 결과"},{"month":"1월","id":"01-16","type":"공문","name":"늘봄학교 강사 채용을 위한 행정정보공동이용시스템 활용 범죄경력 조회"},{"month":"1월","id":"01-17","type":"서식","name":"행정정보공동이용 사전 동의서"},{"month":"1월","id":"01-18","type":"서식","name":"늘봄학교 강사 채용을 위한 행정정보공동이용시스템 활용 범죄경력 조회 결과"},{"month":"1월","id":"01-19","type":"참고자료","name":"범죄경력회보서 제출 방법 안내문(강사 대상 배부용 예시)"},{"month":"1월","id":"01-20","type":"공문","name":"늘봄학교 프로그램 개인위탁 외부강사 계약"},{"month":"1월","id":"01-21","type":"서식","name":"늘봄학교 프로그램 강사 채용 내용"},{"month":"1월","id":"01-22","type":"서식","name":"늘봄학교 프로그램 강사 계약서"},{"month":"1월","id":"01-23","type":"서식","name":"늘봄학교 프로그램 강사 청렴서약서"},{"month":"1월","id":"01-24","type":"서식","name":"늘봄학교 프로그램 개인위탁 외부강사 대장"},{"month":"1월","id":"01-25","type":"서식","name":"늘봄학교 프로그램 개인위탁 외부강사 활동 확인서"},{"month":"1월","id":"01-26","type":"공문","name":"늘봄학교 프로그램 위탁 운영 용역 계약 의뢰"},{"month":"1월","id":"01-27","type":"서식","name":"늘봄학교 프로그램 위탁 운영 기초금액 산출내역"},{"month":"1월","id":"01-28","type":"서식","name":"늘봄학교 프로그램 위탁 운영 용역 과업내용서"},{"month":"1월","id":"01-29","type":"서식","name":"늘봄학교 프로그램 위탁 운영 용역 제안요청서"},{"month":"1월","id":"01-30","type":"공문","name":"늘봄학교 위탁업체 선정을 위한 제안서 평가 계획"},{"month":"1월","id":"01-31","type":"서식","name":"늘봄학교 위탁업체 선정을 위한 제안서 평가 계획"},{"month":"1월","id":"01-32","type":"공문","name":"늘봄학교 프로그램 운영 용역 규격(제안서) 평가 결과 보고"},{"month":"1월","id":"01-33","type":"서식","name":"늘봄학교 프로그램 운영 위탁업체 제안서 평가위원회 참석 수당 지급"},{"month":"1월","id":"01-34","type":"참고자료","name":"참석 수당 – 2025학년도 학교회계 예산편성 기본지침"},{"month":"2월","id":"02-01","type":"공문","name":"늘봄학교 운영 보고"},{"month":"2월","id":"02-02","type":"공문","name":"늘봄학교 운영 계획"},{"month":"2월","id":"02-03","type":"서식","name":"늘봄학교 연간 운영 계획(특수포함, 개인위탁)"},{"month":"2월","id":"02-04","type":"서식","name":"늘봄학교 연간 운영 계획(업체위탁)"},{"month":"2월","id":"02-05","type":"서식","name":"단위학교별 늘봄학교 생활규정"},{"month":"2월","id":"02-06","type":"공문","name":"늘봄학교 운영 계획 안건 발의"},{"month":"2월","id":"02-07","type":"서식","name":"늘봄학교 운영 계획 안건 발의서"},{"month":"2월","id":"02-08","type":"공문","name":"○○초 늘봄학교 운영 계획"},{"month":"2월","id":"02-09","type":"서식","name":"늘봄 프로그램 차시별 운영 계획"},{"month":"2월","id":"02-10","type":"서식","name":"늘봄 프로그램 월별 강사 출근부 및 학생 출석부"},{"month":"2월","id":"02-11","type":"서식","name":"늘봄 프로그램 활동일지"},{"month":"2월","id":"02-12","type":"서식","name":"선택형 돌봄프로그램 출석부 및 운영일지"},{"month":"2월","id":"02-13","type":"서식","name":"선택형 돌봄프로그램 학생 개인별 관리카드"},{"month":"2월","id":"02-14","type":"서식","name":"선택형 돌봄프로그램 신청 증빙 서류"},{"month":"2월","id":"02-15","type":"서식","name":"선택형 돌봄프로그램 담임 추천서"},{"month":"2월","id":"02-16","type":"서식","name":"늘봄학교 귀가일지 서식"},{"month":"2월","id":"02-17","type":"서식","name":"늘봄학교 안전사고 보고서"},{"month":"2월","id":"02-18","type":"서식","name":"응급처치 동의서 및 비상연락처"},{"month":"2월","id":"02-19","type":"공문","name":"늘봄학교 프로그램 신청 안내장 발송"},{"month":"2월","id":"02-20","type":"서식","name":"늘봄학교 프로그램 신청 가정통신문(1~2학년)"},{"month":"2월","id":"02-21","type":"서식","name":"늘봄학교 프로그램 신청 가정통신문(3~6학년)"},{"month":"2월","id":"02-22","type":"서식","name":"늘봄학교 프로그램 수강 환불 규정"},{"month":"2월","id":"02-23","type":"공문","name":"1학기 늘봄학교 프로그램 신청 결과 보고"},{"month":"2월","id":"02-24","type":"공문","name":"특수교육대상학생 늘봄학교 예산 집행 결과 제출"},{"month":"2월","id":"02-25","type":"서식","name":"특수교육대상학생 늘봄학교 예산 집행 결과"},{"month":"2월","id":"02-26","type":"공문","name":"특수교육대상학생 늘봄학교 예산 신청"},{"month":"2월","id":"02-27","type":"서식","name":"특수교육대상학생 늘봄학교 예산 지원 신청서"},{"month":"2월","id":"02-28","type":"공문","name":"특수교육대상학생 늘봄학교 자유수강권 신청 안내장 발송"},{"month":"2월","id":"02-29","type":"서식","name":"특수교육대상학생 늘봄학교 자유수강권 신청서"},{"month":"2월","id":"02-30","type":"공문","name":"특수교육대상학생 방과후 배움카드 신청 접수"},{"month":"2월","id":"02-31","type":"서식","name":"특수교육대상학생 방과후 배움카드 신청서"},{"month":"2월","id":"02-32","type":"공문","name":"통합돌봄 시간제 보조강사 예산 신청"},{"month":"2월","id":"02-33","type":"서식","name":"통합돌봄 시간제 보조강사 예산 지원 신청서"},{"month":"2월","id":"02-34","type":"공문","name":"특수교육대상학생 통합돌봄 시간제 보조강사 채용 계획"},{"month":"2월","id":"02-36","type":"공문","name":"특수교육대상학생 통합돌봄 시간제 보조강사 채용 결과 보고"},{"month":"2월","id":"02-37","type":"참고자료","name":"특수교육대상학생 통합돌봄 시간제 보조강사 지원 안내"},{"month":"3월","id":"03-01","type":"공문","name":"늘봄학교 운영 중 틈새 집중 돌봄 계획"},{"month":"3월","id":"03-02","type":"서식","name":"늘봄학교 운영 중 틈새 집중 돌봄 계획"},{"month":"3월","id":"03-03","type":"공문","name":"3월 신입생 학교적응기간 단기 틈새 프로그램 계획"},{"month":"3월","id":"03-04","type":"서식","name":"신입생 늘봄 적응 단기 틈새 프로그램 운영 계획"},{"month":"3월","id":"03-05","type":"공문","name":"늘봄 프로그램 OO부 폐강 및 신규(대체) 강좌 개설 안내"},{"month":"3월","id":"03-06","type":"서식","name":"늘봄 프로그램 폐강 및 신규(대체) 강좌 개설 안내"},{"month":"3월","id":"03-07","type":"공문","name":"자유수강권 신청 안내장 발송"},{"month":"3월","id":"03-08","type":"서식","name":"자유수강권 신청 안내 가정통신문"},{"month":"3월","id":"03-09","type":"참고자료","name":"특수교육대상학생 자유수강권 운영 안내"},{"month":"3월","id":"03-10","type":"공문","name":"특수교육대상학생 외부 수강기관 배움카드 추가 충전 요청"},{"month":"3월","id":"03-11","type":"서식","name":"특수교육대상학생 방과후 배움카드 추가 충전 요청서"},{"month":"3월","id":"03-12","type":"공문","name":"특수교육대상학생 외부 수강기관 배움카드 반납 확인증 제출"},{"month":"3월","id":"03-13","type":"서식","name":"특수교육대상학생 외부 수강기관 배움카드 반납 확인증"},{"month":"3월","id":"03-14","type":"공문","name":"특수교육대상학생 늘봄학교 수강 기관 변경 보고"},{"month":"3월","id":"03-15","type":"서식","name":"특수교육대상학생 늘봄학교 수강 기관 변경 신청서"},{"month":"5월","id":"05-01","type":"참고자료","name":"교육비 심사결재 관리"},{"month":"5월","id":"05-02","type":"공문","name":"자유수강권 학교장 추천 계획"},{"month":"5월","id":"05-03","type":"서식","name":"자유수강권 학교장 추천 계획"},{"month":"5월","id":"05-04","type":"공문","name":"자유수강권 학교장 학생복지심사위원회 개최"},{"month":"5월","id":"05-05","type":"공문","name":"자유수강권 학교장 학생복지심사위원회 결과보고"},{"month":"5월","id":"05-06","type":"서식","name":"학생복지심사위원회 회의록"},{"month":"5월","id":"05-07","type":"참고자료","name":"자유수강권 학교장 추천"},{"month":"5월","id":"05-08","type":"공문","name":"1학기 늘봄학교 공개의 날 운영 계획"},{"month":"5월","id":"05-09","type":"서식","name":"1학기 늘봄학교 공개의 날 계획"},{"month":"5월","id":"05-10","type":"서식","name":"1학기 늘봄학교 공개의 날 참관록"},{"month":"5월","id":"05-11","type":"서식","name":"1학기 늘봄학교 공개의 날 활동안"},{"month":"5월","id":"05-12","type":"서식","name":"1학기 늘봄학교 공개의 날 참관 안내"},{"month":"5월","id":"05-13","type":"공문","name":"방학 중 돌봄프로그램 급식 납품업체 현장 점검 계획"},{"month":"5월","id":"05-14","type":"서식","name":"늘봄학교 급식 위탁업체 현장방문 확인 평가표"},{"month":"5월","id":"05-15","type":"서식","name":"늘봄학교 급식 위탁업체 현장심사 유의점"},{"month":"6월","id":"06-01","type":"공문","name":"자유수강권 대상자 보고"},{"month":"6월","id":"06-02","type":"서식","name":"늘봄학교 자유수강권 장기 결석자 지원 제한 규정"},{"month":"6월","id":"06-03","type":"서식","name":"교육비 지원(자유수강권) 학생 강사료 및 교재재료비 징수 반환 요청"},{"month":"6월","id":"06-04","type":"서식","name":"자유수강권 과목경정 요청"},{"month":"6월","id":"06-05","type":"공문","name":"여름방학 돌봄프로그램 급식 관련 설문 안내장 발송"},{"month":"6월","id":"06-06","type":"서식","name":"여름방학 돌봄프로그램 급식 형태 설문조사"},{"month":"6월","id":"06-07","type":"공문","name":"여름방학 중 늘봄학교 급식 위탁 운영 계획 안건"},{"month":"6월","id":"06-08","type":"서식","name":"여름방학 중 늘봄학교 급식 위탁 운영 계획 안건발의서"},{"month":"6월","id":"06-09","type":"서식","name":"여름방학 중 늘봄학교 급식 위탁 운영 계획"},{"month":"6월","id":"06-10","type":"공문","name":"1학기 늘봄학교 만족도 조사 실시 계획"},{"month":"6월","id":"06-11","type":"서식","name":"1학기 늘봄학교 만족도 조사 설문지(보호자)"},{"month":"6월","id":"06-12","type":"서식","name":"1학기 늘봄학교 만족도 조사 설문지(학생)"},{"month":"6월","id":"06-13","type":"서식","name":"1학기 늘봄학교 강사 만족도 조사 설문지(보호자)"},{"month":"6월","id":"06-14","type":"서식","name":"1학기 늘봄학교 강사 만족도 조사 설문지(학생)"},{"month":"6월","id":"06-15","type":"공문","name":"1학기 늘봄학교 만족도 조사 결과 보고"},{"month":"6월","id":"06-16","type":"서식","name":"1학기 늘봄학교 만족도 조사 결과(보호자)"},{"month":"6월","id":"06-17","type":"서식","name":"1학기 늘봄학교 만족도 조사 결과(학생)"},{"month":"6월","id":"06-18","type":"서식","name":"1학기 늘봄학교 강사 만족도 조사 결과(보호자)"},{"month":"6월","id":"06-19","type":"서식","name":"1학기 늘봄학교 강사 만족도 조사 결과(학생)"},{"month":"7월","id":"07-01","type":"공문","name":"여름방학 중 늘봄학교 운영 계획 안건"},{"month":"7월","id":"07-02","type":"공문","name":"여름방학 중 초등돌봄전담사 근무 계획"},{"month":"7월","id":"07-03","type":"서식","name":"여름방학 중 초등돌봄전담사 근무 계획"},{"month":"7월","id":"07-04","type":"서식","name":"여름방학 중 초등돌봄전담사 근로 동의서"},{"month":"10월","id":"10-01","type":"공문","name":"2학기 늘봄학교 공개의 날 운영 계획"},{"month":"10월","id":"10-02","type":"서식","name":"2학기 늘봄학교 공개의 날 계획"},{"month":"10월","id":"10-03","type":"서식","name":"2학기 늘봄학교 공개의 날 참관록"},{"month":"10월","id":"10-04","type":"서식","name":"2학기 늘봄학교 공개의 날 활동안"},{"month":"10월","id":"10-05","type":"서식","name":"2학기 늘봄학교 공개의 날 참관 안내"},{"month":"11월","id":"11-01","type":"공문","name":"2학기 늘봄학교 만족도 조사 실시 계획"},{"month":"11월","id":"11-02","type":"서식","name":"2학기 늘봄학교 만족도 조사 설문지(보호자)"},{"month":"11월","id":"11-03","type":"서식","name":"2학기 늘봄학교 만족도 조사 설문지(학생)"},{"month":"11월","id":"11-04","type":"서식","name":"2학기 늘봄학교 강사 만족도 조사 설문지(보호자)"},{"month":"11월","id":"11-05","type":"서식","name":"늘봄학교 강사 만족도 조사 설문지(학생)"},{"month":"11월","id":"11-06","type":"공문","name":"2학기 늘봄학교 만족도 조사 결과 보고"},{"month":"11월","id":"11-07","type":"서식","name":"2학기 늘봄학교 만족도 조사 결과(보호자)"},{"month":"11월","id":"11-08","type":"서식","name":"2학기 늘봄학교 만족도 조사 결과(학생)"},{"month":"11월","id":"11-09","type":"서식","name":"2학기 늘봄학교 강사 만족도 조사 결과(보호자)"},{"month":"11월","id":"11-10","type":"서식","name":"2학기 늘봄학교 강사 만족도 조사 결과(학생)"},{"month":"11월","id":"11-11","type":"공문","name":"늘봄학교 급·간식 만족도 조사"},{"month":"11월","id":"11-12","type":"서식","name":"늘봄학교 급·간식 만족도 설문지"},{"month":"11월","id":"11-13","type":"공문","name":"늘봄학교 급·간식 만족도 조사 결과 보고"},{"month":"11월","id":"11-14","type":"서식","name":"늘봄학교 급·간식 만족도 조사 결과"},{"month":"11월","id":"11-15","type":"공문","name":"늘봄학교 돌봄프로그램 만족도 조사"},{"month":"11월","id":"11-16","type":"서식","name":"늘봄학교 돌봄프로그램 만족도 설문지"},{"month":"11월","id":"11-17","type":"공문","name":"늘봄학교 돌봄프로그램 만족도 조사 결과 보고"},{"month":"11월","id":"11-18","type":"서식","name":"늘봄학교 돌봄프로그램 만족도 조사 결과"},{"month":"11월","id":"11-19","type":"공문","name":"늘봄학교 운영을 위한 수요조사 실시 계획"},{"month":"11월","id":"11-20","type":"서식","name":"늘봄학교 수요조사 안내 가정통신문"},{"month":"11월","id":"11-21","type":"공문","name":"늘봄학교 수요조사 결과 보고"},{"month":"11월","id":"11-22","type":"서식","name":"특수교육대상학생 늘봄학교 수강방법 수요조사 안내 가정통신문"},{"month":"12월","id":"12-01","type":"공문","name":"겨울방학 늘봄학교 운영 계획"},{"month":"12월","id":"12-02","type":"서식","name":"겨울방학 늘봄학교 운영 계획 안건 발의서"},{"month":"12월","id":"12-03","type":"서식","name":"겨울방학 늘봄학교 운영 계획"},{"month":"12월","id":"12-04","type":"공문","name":"겨울방학 중 늘봄학교 급식 위탁 운영 계획"},{"month":"12월","id":"12-05","type":"서식","name":"겨울방학 중 늘봄학교 급식 위탁 운영 계획 안건 발의서"},{"month":"12월","id":"12-06","type":"서식","name":"겨울방학 중 늘봄학교 급식 위탁 운영 계획"},{"month":"12월","id":"12-07","type":"공문","name":"방학 중 돌봄프로그램 급식 납품업체 현장 점검 계획"},{"month":"12월","id":"12-08","type":"서식","name":"늘봄학교 급식 위탁업체 현장방문 확인 평가표"},{"month":"12월","id":"12-09","type":"서식","name":"늘봄학교 급식 위탁업체 현장심사 유의점"},{"month":"12월","id":"12-10","type":"공문","name":"겨울방학 중 초등돌봄전담사 근무 계획"},{"month":"12월","id":"12-11","type":"서식","name":"겨울방학 중 초등돌봄전담사 근무 계획"},{"month":"12월","id":"12-12","type":"서식","name":"겨울방학 중 초등돌봄전담사 근로동의서"},{"month":"12월","id":"12-13","type":"공문","name":"간식 공급 업체 선정 계획"},{"month":"12월","id":"12-14","type":"서식","name":"늘봄학교 간식 공급 업체 선정계획 안건 발의서"},{"month":"12월","id":"12-15","type":"서식","name":"늘봄학교 간식 공급 업체 선정계획 예시1"},{"month":"12월","id":"12-16","type":"서식","name":"늘봄학교 간식 공급 업체 선정계획 예시2"},{"month":"12월","id":"12-17","type":"공문","name":"늘봄학교 프로그램 위탁 운영 계획"},{"month":"12월","id":"12-18","type":"서식","name":"늘봄학교 프로그램 위탁 운영 계획 안건 발의서"},{"month":"12월","id":"12-19","type":"서식","name":"늘봄학교 개인 위탁 운영 계획"},{"month":"12월","id":"12-20","type":"공문","name":"늘봄학교 프로그램 위탁 운영 계획"},{"month":"12월","id":"12-21","type":"서식","name":"늘봄학교 프로그램 위탁 운영 계획 안건 발의서"},{"month":"12월","id":"12-22","type":"서식","name":"늘봄학교 업체위탁 운영 계획"},{"month":"12월","id":"12-23","type":"서식","name":"○○초 늘봄학교 운영 용역 기초금액 산출내역서"},{"month":"12월","id":"12-24","type":"서식","name":"과업내용서"},{"month":"12월","id":"12-25","type":"서식","name":"제안요청서"},{"month":"12월","id":"12-26","type":"공문","name":"늘봄학교 프로그램 운영 용역 계악방법 결정 및 입찰 공고"},{"month":"12월","id":"12-27","type":"서식","name":"늘봄학교 업체위탁 입찰공고문"},{"month":"12월","id":"12-28","type":"서식","name":"늘봄학교 (전부, 일부)운영 계약 특수조건"},{"month":"12월","id":"12-29","type":"서식","name":"늘봄학교 위탁용역 강사료 및 근로자 인건비 관리 특수조건"},{"month":"12월","id":"12-30","type":"서식","name":"표준 개인정보처리 위탁 계약서"},{"month":"12월","id":"12-31","type":"서식","name":"입찰 참가 신청서"},{"month":"12월","id":"12-32","type":"공문","name":"늘봄학교 프로그램 제안서 평가회 참석 협조 요청"},{"month":"12월","id":"12-33","type":"참고자료","name":"늘봄학교 기록물 보존 기간"},{"month":"12월","id":"12-34","type":"공문","name":"돌봄프로그램 신청 안내장 발송"},{"month":"12월","id":"12-35","type":"서식","name":"돌봄프로그램 신청 안내장"},{"month":"12월","id":"12-36","type":"서식","name":"돌봄프로그램 안전 귀가 및 이용 서약서"},{"month":"12월","id":"12-37","type":"서식","name":"선택형 돌봄프로그램 참여 증빙서류"},{"month":"12월","id":"12-38","type":"서식","name":"선택형 돌봄프로그램 담임추천서"},{"month":"12월","id":"12-39","type":"서식","name":"선택형 돌봄프로그램 귀가 안내"},{"month":"12월","id":"12-40","type":"서식","name":"선택형 돌봄 대리인 동행 귀가 위임장"},{"month":"12월","id":"12-41","type":"서식","name":"응급처치 동의서 및 비상연락처"}];
+
+let activeFilter = '전체';
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === f);
+  });
+  filterForms();
+}
+
+function filterForms() {
+  const kw = document.getElementById('keyword').value.trim().toLowerCase();
+  const list = document.getElementById('formList');
+  const noResult = document.getElementById('noResult');
+
+  const filtered = FORMS.filter(f => {
+    const matchFilter = activeFilter === '전체' || f.type === activeFilter || f.month === activeFilter;
+    const matchKw = !kw || f.name.toLowerCase().includes(kw) || f.id.includes(kw) || f.month.includes(kw);
+    return matchFilter && matchKw;
+  });
+
+  document.getElementById('countNum').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    noResult.style.display = 'block';
+    return;
+  }
+  noResult.style.display = 'none';
+
+  list.innerHTML = filtered.map(f => {
+    let name = f.name;
+    if (kw) {
+      const re = new RegExp(`(${kw})`, 'gi');
+      name = name.replace(re, '<mark class="highlight">$1</mark>');
+    }
+    return `
+      <div class="form-card">
+        <div class="badge ${f.type}">${f.type}</div>
+        <div class="form-info">
+          <div class="form-name">${name}</div>
+          <div class="form-meta">${f.month} 업무</div>
+        </div>
+        <div class="form-id">[${f.id}]</div>
+      </div>`;
+  }).join('');
+}
+
+async function askAI() {
+  const q = document.getElementById('aiQuestion').value.trim();
+  if (!q) return;
+
+  const answerEl = document.getElementById('aiAnswer');
+  const btn = document.getElementById('aiBtn');
+
+  answerEl.className = 'ai-answer loading';
+  answerEl.textContent = '잠시만요, AI가 답변을 준비 중입니다...';
+  btn.disabled = true;
+
+  const systemPrompt = `당신은 충남 늘봄지원실 운영자를 돕는 행정 도우미입니다.
+다음은 서식 목록입니다 (서식번호, 월, 유형, 서식명):
+${FORMS.map(f => `[${f.id}] ${f.month} ${f.type}: ${f.name}`).join('\n')}
+
+사용자의 질문에 위 서식 목록을 바탕으로 친절하고 실용적으로 답변하세요.
+관련 서식이 있으면 서식번호와 서식명을 함께 안내해 주세요.
+한국어로 답변하고, 2~5문장으로 간결하게 작성하세요.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: q }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '답변을 가져오지 못했습니다.';
+    answerEl.className = 'ai-answer visible';
+    answerEl.textContent = text;
+  } catch(e) {
+    answerEl.className = 'ai-answer visible';
+    answerEl.textContent = '오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+  }
+  btn.disabled = false;
+}
+
+// 초기 렌더링
+filterForms();
+</script>
+</body>
+</html>
