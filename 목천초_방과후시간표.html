@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>목천초 방과후 시간표</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --primary: #e8772a;
+  --primary-light: #f4a55a;
+  --primary-pale: #fff3ea;
+  --primary-dark: #c45e1a;
+  --bg: #fff8f3;
+  --border: #fde0c8;
+  --text: #2a1a0a;
+  --text-muted: #9a7a5a;
+  --shadow: 0 4px 24px rgba(232,119,42,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+header{background:linear-gradient(135deg,var(--primary-dark),var(--primary),var(--primary-light));padding:24px 20px 20px;text-align:center;box-shadow:0 4px 20px rgba(232,119,42,0.25);}
+header h1{font-family:'Jua',sans-serif;font-size:22px;color:white;letter-spacing:2px;margin-bottom:4px;}
+header p{font-size:12px;color:rgba(255,255,255,0.8);}
+
+.tab-wrap{display:flex;justify-content:center;padding:16px 16px 0;max-width:1100px;margin:0 auto;}
+.tab-btn{flex:1;padding:10px 0;border:2px solid var(--primary);background:white;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;transition:all 0.2s;}
+.tab-btn:first-child{border-radius:10px 0 0 10px;}
+.tab-btn:last-child{border-radius:0 10px 10px 0;border-left:none;}
+.tab-btn.active{background:var(--primary);color:white;}
+
+.filter-wrap{display:flex;justify-content:center;gap:8px;padding:14px 16px 0;flex-wrap:wrap;}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
+.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+.content{max-width:1100px;margin:0 auto;padding:16px 12px 40px;}
+
+/* 표 */
+.table-wrap{overflow-x:auto;border-radius:14px;box-shadow:var(--shadow);}
+table{width:100%;border-collapse:collapse;background:white;font-size:13px;}
+thead tr{background:var(--primary);}
+thead th{padding:12px 10px;color:white;font-weight:700;font-size:12px;text-align:center;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+tbody tr:hover{background:var(--primary-pale);}
+tbody tr:last-child{border-bottom:none;}
+tbody td{padding:10px;text-align:center;vertical-align:middle;line-height:1.5;}
+.prog-num{font-family:'Jua',sans-serif;font-size:15px;color:var(--primary);}
+.prog-name{font-weight:700;font-size:13px;}
+.grade-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:var(--primary-pale);color:var(--primary-dark);}
+.day-badge{display:inline-block;min-width:24px;padding:0 6px;height:24px;border-radius:12px;background:var(--primary);color:white;font-size:11px;font-weight:700;line-height:24px;text-align:center;}
+.fee-free{color:#1a7a45;font-weight:700;}
+.fee-paid{color:var(--primary-dark);font-weight:700;}
+.fee-sub{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.method-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;}
+.method-개인{background:#e8f4fd;color:#1a5fa0;}
+.method-교육청{background:#c8f0d8;color:#1a7a45;}
+.method-학교{background:#fde68a;color:#92650a;}
+.row-group-top td{border-top:2px solid var(--border);}
+
+/* 타임테이블 */
+.tt-wrap{overflow-x:auto;border-radius:14px;box-shadow:var(--shadow);}
+.tt-table{border-collapse:collapse;background:white;width:100%;min-width:700px;}
+.tt-table th,.tt-table td{border:1px solid var(--border);}
+.tt-table tbody tr{background:white !important;}
+.tt-corner{background:var(--primary);color:white;font-weight:700;font-size:12px;text-align:center;padding:10px 6px;width:58px;}
+.tt-day-th{background:var(--primary);color:white;font-weight:700;font-size:13px;text-align:center;padding:10px 4px;}
+.tt-sub-th{background:var(--primary-pale);color:var(--primary-dark);font-size:10px;font-weight:700;text-align:center;padding:4px 2px;white-space:nowrap;min-width:100px;}
+.tt-time-td{background:var(--primary-pale);color:var(--primary-dark);font-size:10px;font-weight:700;text-align:center;padding:0 4px;white-space:nowrap;width:58px;height:32px;}
+.tt-cell{padding:3px;vertical-align:top;min-width:100px;position:relative;}
+.tt-empty{background:#fafafa;}
+.tt-block{border-radius:6px;padding:6px 4px;font-weight:700;cursor:pointer;transition:filter 0.15s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:absolute;inset:3px;}
+.tt-block:hover{filter:brightness(0.88);}
+.tt-block-name{font-size:14px;font-weight:700;}
+.tt-block-grade{font-size:10px;opacity:0.85;margin-top:2px;}
+.tt-block-place{font-size:10px;margin-top:2px;opacity:0.7;font-weight:600;}
+
+/* 팝업 */
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:200;}
+.popup-overlay.show{display:flex;}
+.popup-box{background:white;border-radius:16px;width:300px;max-width:90vw;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden;}
+.popup-head{background:linear-gradient(135deg,var(--primary),var(--primary-light));padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+.popup-head-title{font-family:'Jua',sans-serif;font-size:16px;color:white;}
+.popup-close{background:none;border:none;color:white;font-size:20px;cursor:pointer;}
+.popup-body{padding:16px;}
+.popup-row{display:flex;gap:8px;margin-bottom:8px;font-size:13px;}
+.popup-label{color:var(--text-muted);font-weight:500;white-space:nowrap;min-width:60px;}
+.popup-val{font-weight:700;color:var(--text);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>목천초등학교 방과후학교</h1>
+  <p>2026학년도 프로그램 안내</p>
+</header>
+
+<div class="tab-wrap">
+  <button class="tab-btn active" onclick="switchTab('table')">📋 운영 프로그램</button>
+  <button class="tab-btn" onclick="switchTab('timetable')">🕐 운영 시간표</button>
+</div>
+<div class="filter-wrap">
+  <button class="filter-btn active" onclick="setFilter('all',event)">전체</button>
+  <button class="filter-btn" onclick="setFilter('1-2',event)">1~2학년</button>
+  <button class="filter-btn" onclick="setFilter('3-4',event)">3~4학년</button>
+  <button class="filter-btn" onclick="setFilter('5-6',event)">5~6학년</button>
+</div>
+
+<div class="content">
+  <div id="viewTable"></div>
+  <div id="viewTimetable" style="display:none"></div>
+</div>
+
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="popup-box">
+    <div class="popup-head">
+      <span class="popup-head-title" id="popupTitle"></span>
+      <button class="popup-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-body" id="popupBody"></div>
+  </div>
+</div>
+
+<script>
+const PROGRAMS = [
+  { num:1,  name:'창의미술',   method:'개인',   fee:'40,000원',  feeSub:'재료비 월 10,000원',
+    rows:[{grade:'1~2학년',day:'월',time:'13:00~14:30',place:'실습실'},{grade:'3~4학년',day:'수',time:'13:50~15:30',place:'실습실'},{grade:'5~6학년',day:'월',time:'14:40~16:20',place:'실습실'}]},
+  { num:2,  name:'뉴스포츠',   method:'개인',   fee:'40,000원(3~4학년)<br>20,000원(1~2학년, 5~6학년)', feeSub:'',
+    rows:[{grade:'1~2학년',day:'목',time:'13:50~14:30',place:'강당'},{grade:'3~4학년',day:'월',time:'13:50~15:30',place:'강당'},{grade:'5~6학년',day:'목',time:'14:40~15:30',place:'강당'}]},
+  { num:3,  name:'음악줄넘기', method:'개인',   fee:'40,000원',  feeSub:'',
+    rows:[{grade:'1~2학년',day:'화',time:'13:50~15:10',place:'강당'}]},
+  { num:4,  name:'바이올린',   method:'개인',   fee:'40,000원',  feeSub:'바이올린 학교 대여',
+    rows:[{grade:'3~6학년',day:'화',time:'14:40~16:20',place:'음악실'}]},
+  { num:5,  name:'창의요리',   method:'개인',   fee:'40,000원',  feeSub:'재료비 회당 10,000원',
+    rows:[{grade:'3~6학년',day:'화',time:'13:50~15:30',place:'실습실'},{grade:'3~6학년',day:'목',time:'14:40~16:20',place:'실습실'}]},
+  { num:6,  name:'보드게임',   method:'개인',   fee:'20,000원',  feeSub:'회당 2,000원',
+    rows:[{grade:'1~2학년',day:'금',time:'13:50~14:30',place:'실습실'},{grade:'3~4학년',day:'금',time:'14:40~15:30',place:'실습실'}]},
+  { num:7,  name:'방송댄스',   method:'개인',   fee:'20,000원',  feeSub:'',
+    rows:[{grade:'1~2학년',day:'금',time:'13:00~13:40',place:'느티나무쉼터'},{grade:'3~4학년',day:'금',time:'13:50~14:40',place:'느티나무쉼터'},{grade:'5~6학년',day:'금',time:'14:40~15:30',place:'느티나무쉼터'}]},
+  { num:8,  name:'로봇과학',   method:'교육청', fee:'무료',      feeSub:'',
+    rows:[{grade:'1~2학년',day:'수',time:'13:50~15:30',place:'정보실'}]},
+  { num:9,  name:'드론',       method:'교육청', fee:'무료',      feeSub:'',
+    rows:[{grade:'3~6학년',day:'수',time:'13:50~15:30',place:'돌봄교실2'}]},
+  { num:10, name:'원어민영어', method:'학교',   fee:'무료',      feeSub:'',
+    rows:[{grade:'1~2학년',day:'목',time:'14:40~15:30',place:'돌봄교실'},{grade:'1~2학년',day:'금',time:'14:40~15:30',place:'돌봄교실'},{grade:'3~6학년',day:'수',time:'13:50~15:30',place:'정보실'}]},
+];
+
+const COLORS=[
+  {bg:'#fde8d0',fg:'#c45e1a'},{bg:'#c8f0d8',fg:'#1a7a45'},
+  {bg:'#cce8fa',fg:'#1a5fa0'},{bg:'#e8d5f5',fg:'#6a3fa0'},
+  {bg:'#fde68a',fg:'#92650a'},{bg:'#ffd5d5',fg:'#c0392b'},
+  {bg:'#e8e8e8',fg:'#555'},  {bg:'#ffe0f0',fg:'#a0205a'},
+  {bg:'#d0f0f0',fg:'#1a6a6a'},{bg:'#f0f0c8',fg:'#6a6a1a'},
+];
+
+const DAYS=['월','화','수','목','금'];
+
+// 13:00 ~ 16:30 (10분 단위)
+const TIMES=[];
+for(let h=13;h<=16;h++) for(let m=0;m<60;m+=10){
+  if(h===16&&m>20) break;
+  TIMES.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+}
+
+function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+
+function gradeMatch(grade,filter){
+  if(filter==='all') return true;
+  if(filter==='1-2') return /1|2/.test(grade);
+  if(filter==='3-4') return /3|4/.test(grade);
+  if(filter==='5-6') return /5|6/.test(grade);
+  return true;
+}
+
+let currentFilter='all', currentTab='table';
+
+// ===== 표 =====
+function renderTable(){
+  const filtered=PROGRAMS.map(p=>({...p,rows:p.rows.filter(r=>gradeMatch(r.grade,currentFilter))})).filter(p=>p.rows.length>0);
+  let html=`<div class="table-wrap"><table><thead><tr>
+    <th>번호</th><th>프로그램명</th><th>대상</th><th>운영요일</th><th>운영시간</th><th>운영방법</th><th>수강료 (1개월)</th>
+  </tr></thead><tbody>`;
+  filtered.forEach(prog=>{
+    const fc=prog.fee==='무료'?'fee-free':'fee-paid';
+    prog.rows.forEach((row,i)=>{
+      const first=i===0,rs=prog.rows.length;
+      html+=`<tr class="${first?'row-group-top':''}">`;
+      if(first){
+        html+=`<td rowspan="${rs}" class="prog-num">${prog.num}</td>`;
+        html+=`<td rowspan="${rs}" class="prog-name">${prog.name}</td>`;
+      }
+      html+=`<td><span class="grade-badge">${row.grade}</span></td>`;
+      html+=`<td><span class="day-badge">${row.day}</span></td>`;
+      html+=`<td style="font-size:12px">${row.time}</td>`;
+      if(first){
+        html+=`<td rowspan="${rs}"><span class="method-badge method-${prog.method}">${prog.method}</span></td>`;
+        html+=`<td rowspan="${rs}"><span class="${fc}">${prog.fee}</span>${prog.feeSub?`<div class="fee-sub">${prog.feeSub}</div>`:''}</td>`;
+      }
+      html+=`</tr>`;
+    });
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('viewTable').innerHTML=html;
+}
+
+// ===== 타임테이블 =====
+function buildLanes(){
+  const lanes={};
+  DAYS.forEach(d=>lanes[d]=[]);
+
+  PROGRAMS.forEach((prog,pi)=>{
+    prog.rows.forEach(row=>{
+      if(!gradeMatch(row.grade,currentFilter)) return;
+      const[ts,te]=row.time.split('~');
+      const sMin=toMin(ts),eMin=toMin(te);
+
+      row.day.split('·').forEach(d=>{
+        d=d.trim();
+        if(!DAYS.includes(d)) return;
+        const block={prog,row,sMin,eMin,colorIdx:pi,day:d};
+        let placed=false;
+        for(let li=0;li<lanes[d].length;li++){
+          if(!lanes[d][li].some(x=>x.sMin<eMin&&x.eMin>sMin)){
+            lanes[d][li].push(block); placed=true; break;
+          }
+        }
+        if(!placed) lanes[d].push([block]);
+      });
+    });
+  });
+  return lanes;
+}
+
+function renderTimetable(){
+  const lanes=buildLanes();
+  const lc={};
+  DAYS.forEach(d=>lc[d]=Math.max(lanes[d].length,1));
+
+  // 헤더
+  let html=`<div class="tt-wrap"><table class="tt-table"><thead>`;
+  html+=`<tr><th class="tt-corner">시간</th>`;
+  DAYS.forEach(d=>{ html+=`<th class="tt-day-th" colspan="${lc[d]}">${d}요일</th>`; });
+  html+=`</tr></thead><tbody>`;
+
+  // ★ 핵심: 각 (요일,레인) 조합의 "남은 rowspan" 추적
+  // remaining[d][li] = 아직 rowspan 중인 경우 남은 행 수 (0이면 새 td 출력 필요)
+  const remaining={};
+  DAYS.forEach(d=>{ remaining[d]={}; for(let li=0;li<lc[d];li++) remaining[d][li]=0; });
+
+  TIMES.forEach(t=>{
+    const curMin=toMin(t);
+    html+=`<tr><td class="tt-time-td">${t}</td>`;
+
+    DAYS.forEach(d=>{
+      for(let li=0;li<lc[d];li++){
+        // rowspan 진행 중이면 td 아예 출력 안 함
+        if(remaining[d][li]>0){ remaining[d][li]--; continue; }
+
+        const lane=lanes[d][li]||[];
+        const block=lane.find(b=>b.sMin===curMin);
+
+        if(block){
+          const rs=(block.eMin-block.sMin)/10;
+          remaining[d][li]=rs-1; // 이번 행 포함이므로 -1
+          const c=COLORS[block.colorIdx%COLORS.length];
+          const ds=encodeURIComponent(JSON.stringify({
+            name:block.prog.name, grade:block.row.grade, day:d,
+            time:block.row.time, method:block.prog.method,
+            fee:block.prog.fee, feeSub:block.prog.feeSub, place:block.row.place||''
+          }));
+          html+=`<td class="tt-cell" rowspan="${rs}" onclick="showPopup('${ds}')">
+            <div class="tt-block" style="background:${c.bg};color:${c.fg}">
+              <span class="tt-block-name">${block.prog.name}</span>
+              <span class="tt-block-grade">${block.row.grade}</span>${block.row.place ? '<span class="tt-block-place">'+block.row.place+'</span>' : ''}
+            </div>
+          </td>`;
+        } else {
+          html+=`<td class="tt-cell tt-empty"></td>`;
+        }
+      }
+    });
+
+    html+=`</tr>`;
+  });
+
+  html+=`</tbody></table></div>`;
+  document.getElementById('viewTimetable').innerHTML=html;
+}
+
+// ===== 팝업 =====
+function showPopup(ds){
+  const d=JSON.parse(decodeURIComponent(ds));
+  document.getElementById('popupTitle').textContent=d.name;
+  document.getElementById('popupBody').innerHTML=`
+    <div class="popup-row"><span class="popup-label">대상</span><span class="popup-val">${d.grade}</span></div>
+    <div class="popup-row"><span class="popup-label">운영요일</span><span class="popup-val">${d.day}요일</span></div>
+    <div class="popup-row"><span class="popup-label">운영시간</span><span class="popup-val">${d.time}</span></div>
+    <div class="popup-row"><span class="popup-label">운영방법</span><span class="popup-val">${d.method}</span></div>
+    <div class="popup-row"><span class="popup-label">수강료</span><span class="popup-val">${d.fee}${d.feeSub?'<br><span style="font-size:11px;color:#999">'+d.feeSub+'</span>':''}</span></div>
+  `;
+  document.getElementById('popupOverlay').classList.add('show');
+}
+function closePopup(){ document.getElementById('popupOverlay').classList.remove('show'); }
+
+// ===== 탭/필터 =====
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('viewTable').style.display=tab==='table'?'block':'none';
+  document.getElementById('viewTimetable').style.display=tab==='timetable'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='table')||(i===1&&tab==='timetable')));
+  render();
+}
+function setFilter(f,e){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(e) e.target.classList.add('active');
+  render();
+}
+function render(){
+  if(currentTab==='table') renderTable();
+  else renderTimetable();
+}
+render();
+</script>
+</body>
+</html>
