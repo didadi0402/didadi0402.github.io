@@ -55,23 +55,7 @@
     }
     .header-deco svg { width: 100%; height: 100%; }
 
-    /* shimmer */
-    .header-shimmer {
-      position: absolute;
-      inset: 0;
-      border-radius: 18px;
-      background: linear-gradient(110deg, transparent 25%, rgba(255,220,200,0.15) 50%, transparent 75%);
-      background-size: 200% 100%;
-      background-position: -200% 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .header-shimmer.active { animation: shimmerSlide 1.2s ease forwards; }
-    @keyframes shimmerSlide {
-      0%   { background-position: -200% 0; opacity: 1; }
-      80%  { background-position: 200% 0;  opacity: 1; }
-      100% { background-position: 200% 0;  opacity: 0; }
-    }
+    
 
     /* ── 사진 + 텍스트 내부 레이아웃 ── */
     .header-inner {
@@ -403,7 +387,7 @@
         <path d="M45,0 Q-20,75 40,150 Q100,225 15,300" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"  stroke-linecap="round"/>
       </svg>
     </div>
-    <div class="header-shimmer" id="headerShimmer"></div>
+    
 
     <div class="header-inner">
       <!-- 왼쪽 큰 사진 1장 (5:5) -->
@@ -436,27 +420,15 @@
   </div>
 
   <script>
-    function runShimmer() {
-      const el = document.getElementById('headerShimmer');
-      el.classList.remove('active');
-      void el.offsetWidth;
-      el.classList.add('active');
-      const next = 3000 + Math.random() * 2000;
-      setTimeout(runShimmer, next);
-    }
-    setTimeout(runShimmer, 1000);
-
     function alignTextToTitle() {
       const title = document.querySelector('.header-left .title');
       const block = document.querySelector('.header-text-block');
       if (!title || !block) return;
-      // title 렌더링 너비를 블록 전체 width로 고정
       const w = title.getBoundingClientRect().width;
       block.style.width = w + 'px';
     }
     document.fonts.ready.then(() => {
       alignTextToTitle();
-      // 폰트 로드 직후 한 프레임 더 기다려서 재측정
       requestAnimationFrame(alignTextToTitle);
     });
     window.addEventListener('resize', alignTextToTitle);
