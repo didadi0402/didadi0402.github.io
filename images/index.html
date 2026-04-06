@@ -4,76 +4,253 @@
   <title>성환초 / 목천초 늘봄지원실</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gamja+Flower&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; background: #f2f4f8; padding: 12px; }
 
-    /* 헤더 */
-    .header {
-      background: #2d5a8e;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 14px;
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+      background: #f5f0e8;
+      padding: 14px;
+      height: 100vh;
       display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .header-left { flex: 1; }
-    .header-left .year { font-size: 13px; color: #a8c8f0; margin-bottom: 4px; }
-    .header-left .school { font-size: 18px; color: #ffffff; margin-bottom: 4px; }
-    .header-left .title { font-size: 34px; font-weight: bold; color: #ffffff; }
-    .header-photos { display: flex; gap: 6px; flex-shrink: 0; }
-    .header-photo {
-      width: 72px;
-      height: 80px;
-      background: #4a7aae;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: #a8c8f0;
+      flex-direction: column;
       overflow: hidden;
     }
-    .header-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
-    /* 섹션 */
+    /* ── 헤더 ── */
+    .header {
+      border-radius: 18px;
+      padding: 0;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 6px 24px rgba(30,50,70,0.28);
+      position: relative;
+      overflow: visible;
+      height: 40vh;
+      flex-shrink: 0;
+      background: #3a4f60;
+      clip-path: inset(0 round 18px);
+    }
+    /* 배경 질감 */
+    .header-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 50%, rgba(80,110,140,0.45) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(50,80,100,0.3) 0%, transparent 50%);
+      border-radius: 18px;
+    }
+    /* 장식 곡선 — 오른쪽 사진 근처 */
+    .header-deco {
+      position: absolute;
+      right: 2%;
+      top: 0; bottom: 0;
+      width: 110px;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .header-deco svg { width: 100%; height: 100%; }
+
+    
+
+    /* ── 사진 + 텍스트 내부 레이아웃 ── */
+    .header-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 0;
+    }
+
+    /* 왼쪽 큰 사진 (5:5 정사각형) */
+    .photo-left {
+      flex-shrink: 0;
+      width: calc(40vh - 32px);
+      height: calc(40vh - 32px);
+      max-width: 38%;
+      max-height: 100%;
+      background: rgba(255,255,255,0.12);
+      border-radius: 10px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      box-shadow: 4px 4px 14px rgba(0,0,0,0.35);
+      overflow: hidden;
+      transform: rotate(-2deg);
+      position: relative;
+      z-index: 3;
+    }
+    .photo-left img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* 중앙 텍스트 — 블록 중앙, 내용 왼쪽 정렬 */
+    .header-left {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .header-text-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: fit-content;
+    }
+    .header-left .title {
+      font-family: 'Gamja Flower', cursive;
+      font-size: clamp(44px, 9.5vw, 92px);
+      font-weight: 400;
+      color: #ffffff;
+      letter-spacing: 1px;
+      line-height: 1.0;
+      text-shadow: 0 3px 14px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
+    .header-left .school {
+      font-family: 'Gamja Flower', cursive;
+      font-size: clamp(26px, 5vw, 48px);
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0;
+      font-weight: 400;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .header-left .year {
+      font-family: 'Gamja Flower', cursive;
+      font-size: clamp(14px, 2vw, 20px);
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 2px;
+      letter-spacing: 2px;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .header-left .year,
+    .header-left .school {
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    /* 오른쪽 작은 사진 2장 겹치기 */
+    .photos-right {
+      flex-shrink: 0;
+      position: relative;
+      width: calc((40vh - 32px) * 0.85);
+      height: calc(40vh - 32px);
+      max-width: 32%;
+    }
+    .photo-right {
+      position: absolute;
+      width: 72%;
+      aspect-ratio: 1 / 1;
+      background: rgba(255,255,255,0.12);
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.28);
+      box-shadow: 3px 3px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .photo-right img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-right:nth-child(1) {
+      top: 4%; right: 0;
+      transform: rotate(15deg);
+      z-index: 4;
+    }
+    .photo-right:nth-child(2) {
+      bottom: 4%; left: 0;
+      transform: rotate(-12deg);
+      z-index: 3;
+    }
+    .header-photo-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.25); font-size: 10px;
+    }
+
+    /* ── 콘텐츠 래퍼 ── */
+    .content-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── 섹션 공통 ── */
     .section {
-      background: #e8f0f8;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
+      background: #fffdf8;
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 10px rgba(122,92,62,0.08);
+      border: 1px solid #ede5d5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
     .section-label {
-      font-size: 12px;
-      color: #2d5a8e;
-      font-weight: bold;
+      font-size: 11px;
+      color: #a07850;
+      font-weight: 700;
       margin-bottom: 10px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: #c89a60;
+      border-radius: 2px;
+    }
+
+    /* ── 아이콘 그리드 ── */
     .icon-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      flex: 1;
+      align-content: center;
     }
     .icon-item {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 10px 4px;
+      background: #fdf8f2;
+      border-radius: 12px;
+      padding: 10px 3px 8px;
       text-align: center;
-      border: 0.5px solid #c8d8e8;
+      border: 1px solid #e8dece;
       text-decoration: none;
       display: block;
+      transition: all 0.18s ease;
+    }
+    .icon-item:active {
+      transform: scale(0.95);
+      background: #f5ece0;
     }
     .icon-item.school-icon {
-      background: #d0e4f4;
-      border: 1px solid #9abcd8;
+      background: linear-gradient(135deg, #f0e6d4, #e8d5b8);
+      border: 1px solid #d4b896;
     }
     .icon-img {
-      width: 42px;
-      height: 42px;
-      background: #dce8f4;
-      border-radius: 8px;
-      margin: 0 auto 6px;
+      width: 38px;
+      height: 38px;
+      margin: 0 auto 5px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -81,88 +258,216 @@
     }
     .icon-img img { width: 100%; height: 100%; object-fit: contain; }
     .icon-label {
-      font-size: 10px;
-      color: #4a6a8a;
+      font-size: 9.5px;
+      color: #6b4e2e;
       line-height: 1.3;
+      font-weight: 700;
     }
-    .school-icon .icon-label { color: #1d4a7a; font-weight: bold; }
+    .school-icon .icon-label { color: #5a3e22; }
 
-    /* 주요링크 */
+    /* ── 주요링크 ── */
     .links-section {
-      background: #ede8f8;
-      border-radius: 14px;
-      padding: 14px;
+      background: #fffdf8;
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 10px rgba(122,92,62,0.08);
+      border: 1px solid #ede5d5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
     .links-label {
-      font-size: 12px;
-      color: #5a3a8a;
-      font-weight: bold;
+      font-size: 11px;
+      color: #a07850;
+      font-weight: 700;
       margin-bottom: 10px;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .links-label::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: #c89a60;
+      border-radius: 2px;
     }
     .links-row {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
+      gap: 7px;
+      flex: 1;
+      align-content: center;
     }
     .link-item {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 10px 4px;
+      background: #fdf8f2;
+      border-radius: 12px;
+      padding: 12px 4px 10px;
       text-align: center;
-      border: 0.5px solid #c0b0e0;
+      border: 1px solid #e8dece;
       text-decoration: none;
       display: block;
+      transition: all 0.18s ease;
+    }
+    .link-item:active {
+      transform: scale(0.95);
+      background: #f5ece0;
+    }
+    .link-emoji {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 5px;
+      line-height: 1;
     }
     .link-label {
-      font-size: 10px;
-      color: #5a3a8a;
-      line-height: 1.4;
+      font-size: 9.5px;
+      color: #6b4e2e;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    /* ── 팝업 ── */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(80,50,20,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .popup-box {
+      background: #fffdf8;
+      padding: 32px 36px;
+      border-radius: 18px;
+      text-align: center;
+      border: 1px solid #e8dece;
+      box-shadow: 0 8px 32px rgba(122,92,62,0.2);
+    }
+    .popup-email {
+      font-size: 18px;
+      font-weight: 700;
+      color: #7a5c3e;
+      margin-bottom: 8px;
+    }
+    .popup-desc {
+      font-size: 13px;
+      color: #a08060;
+      margin-bottom: 20px;
+    }
+    .popup-close {
+      padding: 10px 28px;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 600;
+      border: 1.5px solid #c89a60;
+      border-radius: 10px;
+      background: #fdf8f2;
+      color: #7a5c3e;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .popup-close:active {
+      background: #f0e4cc;
     }
   </style>
 </head>
 <body>
 
   <!-- 헤더 -->
-  <div class="header">
-    <div class="header-left">
-      <div class="year">2026학년도</div>
-      <div class="school">성환초 / 목천초</div>
-      <div class="title">늘봄지원실</div>
+  <div class="header" id="mainHeader">
+    <div class="header-bg"></div>
+    <div class="header-deco">
+      <svg viewBox="0 0 110 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M85,0 Q20,75 80,150 Q140,225 55,300" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="22" stroke-linecap="round"/>
+        <path d="M65,0 Q0,75 60,150 Q120,225 35,300"  fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M45,0 Q-20,75 40,150 Q100,225 15,300" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"  stroke-linecap="round"/>
+      </svg>
     </div>
-    <div class="header-photos">
-      <div class="header-photo"><img src="images/header01.jpg" alt="" /></div>
-      <div class="header-photo"><img src="images/header02.jpg" alt="" /></div>
-      <div class="header-photo"><img src="images/header03.jpg" alt="" /></div>
+    
+
+    <div class="header-inner">
+      <!-- 왼쪽 큰 사진 1장 (5:5) -->
+      <div class="photo-left">
+        <img src="images/header01.jpg" alt=""
+          onerror="this.style.display='none';this.parentNode.innerHTML+='<div class=\'header-photo-placeholder\'>사진 1</div>'"/>
+      </div>
+
+      <!-- 중앙 텍스트 -->
+      <div class="header-left">
+        <div class="header-text-block">
+          <div class="year">&nbsp;&nbsp;2026학년도</div>
+          <div class="school">&nbsp;성환 / 목천</div>
+          <div class="title">늘봄지원실</div>
+        </div>
+      </div>
+
+      <!-- 오른쪽 작은 사진 2장 (4:4, 겹치기) -->
+      <div class="photos-right">
+        <div class="photo-right">
+          <img src="images/header02.jpg" alt=""
+            onerror="this.style.display='none';this.parentNode.innerHTML+='<div class=\'header-photo-placeholder\'>사진 2</div>'"/>
+        </div>
+        <div class="photo-right">
+          <img src="images/header03.jpg" alt=""
+            onerror="this.style.display='none';this.parentNode.innerHTML+='<div class=\'header-photo-placeholder\'>사진 3</div>'"/>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    function alignTextToTitle() {
+      const title = document.querySelector('.header-left .title');
+      const block = document.querySelector('.header-text-block');
+      if (!title || !block) return;
+      const w = title.getBoundingClientRect().width;
+      block.style.width = w + 'px';
+    }
+    document.fonts.ready.then(() => {
+      alignTextToTitle();
+      requestAnimationFrame(alignTextToTitle);
+    });
+    window.addEventListener('resize', alignTextToTitle);
+  </script>
+
+  <!-- 콘텐츠 영역 -->
+  <div class="content-wrap">
 
   <!-- 성환초 -->
   <div class="section">
     <div class="section-label">성환초등학교</div>
     <div class="icon-row">
       <a href="#" class="icon-item school-icon">
-        <div class="icon-img"><img src="images/school01.jpg" alt="" /></div>
-        <div class="icon-label">성환초</div>
+        <div class="icon-img"><img src="images/sung.svg" alt="" /></div>
+        <div class="icon-label">업무진행현황</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon01.jpg" alt="" /></div>
+      <a href="성환초_방과후시간표.html" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/date-and-time-icon.svg" alt="" /></div>
         <div class="icon-label">늘봄시간표</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon02.jpg" alt="" /></div>
+      <a href="https://didadi0402.github.io/%EB%8A%98%EB%B4%84_%EB%8B%AC%EB%A0%A5.html" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/calendar-icon.svg" alt="" /></div>
         <div class="icon-label">학사일정</div>
       </a>
       <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon03.jpg" alt="" /></div>
+        <div class="icon-img"><img src="images/monthly-subscription-icon.svg" alt="" /></div>
         <div class="icon-label">지출</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon04.jpg" alt="" /></div>
+      <a href="https://docs.google.com/spreadsheets/d/1WrLHOUkNpce0fwC4qRYcbynhhw_oP3png-ojMmhp03o/edit?usp=sharing" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/file-black-icon.svg" alt="" /></div>
         <div class="icon-label">출석부</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon05.jpg" alt="" /></div>
-        <div class="icon-label">주요정보</div>
+      <a href="링크 주소" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/information-icon.svg" alt="" /></div>
+        <div class="icon-label">학교정보</div>
+      </a>
+      <a href="늘봄_FAQ검색.html" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/faq.svg" alt="" /></div>
+        <div class="icon-label">검색</div>
       </a>
     </div>
   </div>
@@ -172,28 +477,32 @@
     <div class="section-label">목천초등학교</div>
     <div class="icon-row">
       <a href="#" class="icon-item school-icon">
-        <div class="icon-img"><img src="images/school02.jpg" alt="" /></div>
-        <div class="icon-label">목천초</div>
+        <div class="icon-img"><img src="images/mok.svg" alt="" /></div>
+        <div class="icon-label">업무진행현황</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon01.jpg" alt="" /></div>
+      <a href="목천초_방과후시간표.html" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/date-and-time-icon.svg" alt="" /></div>
         <div class="icon-label">늘봄시간표</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon02.jpg" alt="" /></div>
+      <a href="목천초_달력.html" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/calendar-icon.svg" alt="" /></div>
         <div class="icon-label">학사일정</div>
       </a>
       <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon03.jpg" alt="" /></div>
+        <div class="icon-img"><img src="images/monthly-subscription-icon.svg" alt="" /></div>
         <div class="icon-label">지출</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon04.jpg" alt="" /></div>
+      <a href="https://docs.google.com/spreadsheets/d/1ITLKlkaY0zp3y7hoyE_C2F5orBfW-lQr3PCbH3gxVF0/edit?usp=sharing" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/file-black-icon.svg" alt="" /></div>
         <div class="icon-label">출석부</div>
       </a>
-      <a href="#" class="icon-item">
-        <div class="icon-img"><img src="images/icon05.jpg" alt="" /></div>
-        <div class="icon-label">주요정보</div>
+      <a href="링크 주소" class="icon-item" target="_blank">
+        <div class="icon-img"><img src="images/information-icon.svg" alt="" /></div>
+        <div class="icon-label">학교정보</div>
+      </a>
+      <a href="#" class="icon-item" onclick="event.preventDefault(); document.getElementById('emailPopup').style.display='flex';">
+        <div class="icon-img"><img src="images/envelope-line-icon.svg" alt="" /></div>
+        <div class="icon-label">이메일</div>
       </a>
     </div>
   </div>
@@ -202,16 +511,37 @@
   <div class="links-section">
     <div class="links-label">주요링크</div>
     <div class="links-row">
-      <a href="#" class="link-item"><div class="link-label">업무포털</div></a>
-      <a href="#" class="link-item"><div class="link-label">문자알리미</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크3</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크4</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크5</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크6</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크7</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크8</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크9</div></a>
-      <a href="#" class="link-item"><div class="link-label">링크10</div></a>
+      <a href="https://cne.eduptl.kr/" class="link-item" target="_blank">
+        <span class="link-emoji">🖥️</span>
+        <div class="link-label">업무포털</div>
+      </a>
+      <a href="https://send.cne.go.kr/b2cCNE/cne/login.do" class="link-item" target="_blank">
+        <span class="link-emoji">📱</span>
+        <div class="link-label">문자알리미</div>
+      </a>
+      <a href="https://v4.schoolbell-e.com/" class="link-item" target="_blank">
+        <span class="link-emoji">🔔</span>
+        <div class="link-label">학교종이</div>
+      </a>
+      <a href="https://next.share.go.kr/idx-login.do" class="link-item" target="_blank">
+        <span class="link-emoji">🏛️</span>
+        <div class="link-label">행정정보공동이용</div>
+      </a>
+      <a href="https://ai.cne.go.kr/" class="link-item" target="_blank">
+        <span class="link-emoji">🤝</span>
+        <div class="link-label">마주온</div>
+      </a>
+    </div>
+  </div>
+
+  </div><!-- /content-wrap -->
+
+  <!-- 이메일 팝업 -->
+  <div id="emailPopup" class="popup-overlay">
+    <div class="popup-box">
+      <div class="popup-email">didadi0402&#64;ai&#46;cne&#46;go&#46;kr</div>
+      <div class="popup-desc">위 이메일 주소로 목천초 월간 계획서를 발송해주세요</div>
+      <button class="popup-close" onclick="document.getElementById('emailPopup').style.display='none'">닫기</button>
     </div>
   </div>
 
